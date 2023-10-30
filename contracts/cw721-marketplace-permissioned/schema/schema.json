@@ -46,7 +46,10 @@
           "$ref": "#/definitions/Addr"
         },
         "cw721": {
-          "$ref": "#/definitions/Addr"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Addr"
+          }
         },
         "denom": {
           "type": "string"
@@ -122,6 +125,30 @@
             }
           },
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "add_nft"
+          ],
+          "properties": {
+            "add_nft": {
+              "$ref": "#/definitions/UpdateNftMsg"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "remove_nft"
+          ],
+          "properties": {
+            "remove_nft": {
+              "$ref": "#/definitions/UpdateNftMsg"
+            }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -183,7 +210,10 @@
           "$ref": "#/definitions/Addr"
         },
         "cw721": {
-          "$ref": "#/definitions/Addr"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Addr"
+          }
         },
         "denom": {
           "type": "string"
@@ -582,6 +612,7 @@
     "SwapMsg": {
       "type": "object",
       "required": [
+        "cw721",
         "expires",
         "id",
         "price",
@@ -589,6 +620,9 @@
         "token_id"
       ],
       "properties": {
+        "cw721": {
+          "$ref": "#/definitions/Addr"
+        },
         "expires": {
           "$ref": "#/definitions/Expiration"
         },
@@ -655,6 +689,17 @@
         },
         "price": {
           "$ref": "#/definitions/Uint128"
+        }
+      }
+    },
+    "UpdateNftMsg": {
+      "type": "object",
+      "required": [
+        "cw721"
+      ],
+      "properties": {
+        "cw721": {
+          "$ref": "#/definitions/Addr"
         }
       }
     }

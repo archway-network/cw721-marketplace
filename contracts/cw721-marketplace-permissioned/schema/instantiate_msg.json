@@ -12,7 +12,10 @@
       "$ref": "#/definitions/Addr"
     },
     "cw721": {
-      "$ref": "#/definitions/Addr"
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Addr"
+      }
     },
     "denom": {
       "type": "string"
