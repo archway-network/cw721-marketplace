@@ -5,7 +5,8 @@ use cosmwasm_std::{
 };
 
 use crate::execute::{
-    execute_create, execute_cancel, execute_finish, execute_update, execute_update_config,
+    execute_create, execute_cancel, execute_finish, execute_update, 
+    execute_add_cw721, execute_remove_cw721, execute_update_config,
 };
 use crate::query::{
     query_details, query_list, query_swap_total, query_swaps, query_swaps_by_creator, query_swaps_by_denom,
@@ -50,11 +51,15 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
+        // Swap entry points
         ExecuteMsg::Create(msg) => execute_create(deps, env, info, msg),
         ExecuteMsg::Finish(msg) => execute_finish(deps, env, info, msg),
         ExecuteMsg::Update(msg) => execute_update(deps, env, info, msg),
         ExecuteMsg::Cancel(msg) => execute_cancel(deps, env, info, msg),
+        // Admin only entry points
         ExecuteMsg::UpdateConfig { config } => execute_update_config(deps, env, info, config),
+        ExecuteMsg::AddNft(msg) => execute_add_cw721(deps, env, info, msg),
+        ExecuteMsg::RemoveNft(msg) => execute_remove_cw721(deps, env, info, msg),
     }
 }
 

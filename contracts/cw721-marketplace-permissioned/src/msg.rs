@@ -18,7 +18,11 @@ pub enum ExecuteMsg {
     Finish(SwapMsg),
     Cancel(CancelMsg),
     Update(UpdateMsg),
+
+    // Admin functions
     UpdateConfig { config: Config, },
+    AddNft(UpdateNftMsg),
+    RemoveNft(UpdateNftMsg),
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -40,6 +44,10 @@ pub struct SwapMsg {
     pub expires: Expiration,
     pub price: Uint128,
     pub swap_type: SwapType,
+}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct UpdateNftMsg {
+    pub cw721: Addr,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

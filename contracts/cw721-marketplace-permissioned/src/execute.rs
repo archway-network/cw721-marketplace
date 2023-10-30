@@ -4,7 +4,7 @@ use crate::state::{CW721Swap, Config, CONFIG, SWAPS, SwapType};
 use crate::utils::{
     check_sent_required_payment, query_name_owner, handle_swap_transfers,
 };
-use crate::msg::{CancelMsg, SwapMsg, UpdateMsg};
+use crate::msg::{CancelMsg, SwapMsg, UpdateMsg, UpdateNftMsg};
 use crate::error::ContractError;
 
 pub fn execute_create(
@@ -193,4 +193,52 @@ pub fn execute_update_config(
     CONFIG.save(deps.storage, &config_update)?;
 
     Ok(Response::new().add_attribute("action", "update_config"))
+}
+
+pub fn execute_add_cw721(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    msg: UpdateNftMsg,
+) -> Result<Response, ContractError> {
+    let mut config = CONFIG.load(deps.storage)?;
+
+    if config.admin != info.sender {
+        return Err(ContractError::Unauthorized {});
+    }
+    if config.cw721.contains(&msg.cw721) {
+        return Err(ContractError::InvalidInput {});
+    }
+
+    config.cw721.push(msg.cw721.clone());
+
+    CONFIG.save(deps.storage, &config)?;
+
+    Ok(Response::new()
+        .add_attribute("action", "add_cw721")
+        .add_attribute("cw721", msg.cw721))
+}
+
+pub fn execute_remove_cw721(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    msg: UpdateNftMsg,
+) -> Result<Response, ContractError> {
+    let mut config = CONFIG.load(deps.storage)?;
+
+    if config.admin != info.sender {
+        return Err(ContractError::Unauthorized {});
+    }
+    if !config.cw721.contains(&msg.cw721) {
+        return Err(ContractError::InvalidInput {});
+    }
+
+    config.cw721.retain(|contract| *contract != msg.cw721.clone());
+
+    CONFIG.save(deps.storage, &config)?;
+
+    Ok(Response::new()
+        .add_attribute("action", "add_cw721")
+        .add_attribute("cw721", msg.cw721))
 }
