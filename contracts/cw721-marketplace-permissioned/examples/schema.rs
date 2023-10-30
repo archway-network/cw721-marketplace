@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_schema::{export_schema, remove_schemas, schema_for};
 
-use cw721_marketplace_single_collection::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
+use cw721_marketplace_permissioned::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct Schema {
