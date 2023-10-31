@@ -8,6 +8,7 @@ use crate::state::{Config,SwapType};
 pub struct InstantiateMsg {
     pub admin: Addr,
     pub denom: String,
+    pub fee_percentage: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -18,6 +19,7 @@ pub enum ExecuteMsg {
     Cancel(CancelMsg),
     Update(UpdateMsg),
     UpdateConfig { config: Config, },
+    Withdraw { amount: Uint128, },
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]

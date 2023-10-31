@@ -1,8 +1,10 @@
-use cosmwasm_std::{Coin, DepsMut, Env, MessageInfo, Order, Response};
+use cosmwasm_std::{
+    BankMsg, Coin, DepsMut, Env, MessageInfo, Order, Response, Uint128
+};
 
 use crate::state::{CW721Swap, Config, CONFIG, SWAPS, SwapType};
 use crate::utils::{
-    check_sent_required_payment, query_name_owner, handle_swap_transfers,
+    check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };
 use crate::msg::{CancelMsg, SwapMsg, UpdateMsg};
 use crate::error::ContractError;
@@ -121,10 +123,28 @@ pub fn execute_finish(
             return Err(ContractError::InvalidInput {});
         }
     }
-  
+
+    // Calculate fee split
+    let split = fee_split(&deps, swap.price).unwrap();
+
+    // Do swap transfer
     let transfer_results = match msg.swap_type {
-        SwapType::Offer => handle_swap_transfers(&info.sender, &swap.creator, swap.clone(), &info.funds, config.denom.clone())?,
-        SwapType::Sale => handle_swap_transfers(&swap.creator, &info.sender, swap.clone(), &info.funds, config.denom.clone())?,
+        SwapType::Offer => handle_swap_transfers(
+            &info.sender, 
+            &swap.creator, 
+            swap.clone(), 
+            &info.funds, 
+            config.denom.clone(),
+            split,
+        )?,
+        SwapType::Sale => handle_swap_transfers(
+            &swap.creator, 
+            &info.sender, 
+            swap.clone(), 
+            &info.funds, 
+            config.denom.clone(),
+            split,
+        )?,
     };
 
     // Remove all swaps for this token_id 
@@ -185,4 +205,30 @@ pub fn execute_update_config(
     CONFIG.save(deps.storage, &config_update)?;
 
     Ok(Response::new().add_attribute("action", "update_config"))
+}
+
+pub fn execute_withdraw_fees(
+    deps: DepsMut,
+    info: MessageInfo,
+    amount: Uint128,
+) -> Result<Response, ContractError> {
+    let config = CONFIG.load(deps.storage)?;
+
+    if config.admin != info.sender {
+        return Err(ContractError::Unauthorized {});
+    }
+
+    let transfer_result = BankMsg::Send {
+        to_address: info.sender.into(),
+        amount: ([Coin {
+            denom: config.denom,
+            amount,
+        }])
+        .to_vec(),
+    };
+
+    Ok(Response::new()
+        .add_attribute("action", "withdraw")
+        .add_attribute("amount", amount.to_string())
+        .add_message(transfer_result))
 }
