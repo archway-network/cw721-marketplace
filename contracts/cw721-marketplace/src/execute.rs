@@ -125,23 +125,31 @@ pub fn execute_finish(
     }
 
     // Calculate fee split
-    let split = fee_split(&deps, swap.price).unwrap();
+    let split = if swap.payment_token.is_none() { 
+        let funds: Vec<Coin> = info.funds.into_iter()
+            .filter(|coin| { coin.denom == config.denom })
+            .collect();
+        
+        fee_split(&deps, funds[0].amount).unwrap()
+    } else { 
+        fee_split(&deps, swap.price).unwrap()
+    };
 
     // Do swap transfer
     let transfer_results = match msg.swap_type {
         SwapType::Offer => handle_swap_transfers(
+            env,
             &info.sender, 
             &swap.creator, 
             swap.clone(), 
-            &info.funds, 
             config.denom.clone(),
             split,
         )?,
         SwapType::Sale => handle_swap_transfers(
+            env,
             &swap.creator, 
             &info.sender, 
             swap.clone(), 
-            &info.funds, 
             config.denom.clone(),
             split,
         )?,
