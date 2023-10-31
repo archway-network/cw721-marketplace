@@ -4,21 +4,20 @@
   "type": "object",
   "required": [
     "admin",
-    "cw721",
-    "denom"
+    "denom",
+    "fee_percentage"
   ],
   "properties": {
     "admin": {
       "$ref": "#/definitions/Addr"
     },
-    "cw721": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/Addr"
-      }
-    },
     "denom": {
       "type": "string"
+    },
+    "fee_percentage": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
     }
   },
   "definitions": {
