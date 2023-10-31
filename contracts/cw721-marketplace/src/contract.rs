@@ -62,7 +62,7 @@ pub fn execute(
         
         // Admin only
         ExecuteMsg::UpdateConfig { config } => execute_update_config(deps, env, info, config),
-        ExecuteMsg::Withdraw { amount } => execute_withdraw_fees(deps, info, amount),
+        ExecuteMsg::Withdraw(msg) => execute_withdraw_fees(deps, env, info, msg),
     }
 }
 

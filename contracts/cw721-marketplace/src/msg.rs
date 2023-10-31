@@ -19,7 +19,7 @@ pub enum ExecuteMsg {
     Cancel(CancelMsg),
     Update(UpdateMsg),
     UpdateConfig { config: Config, },
-    Withdraw { amount: Uint128, },
+    Withdraw(WithdrawMsg),
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -41,6 +41,12 @@ pub struct SwapMsg {
     pub expires: Expiration,
     pub price: Uint128,
     pub swap_type: SwapType,
+}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct WithdrawMsg { 
+    pub amount: Uint128, 
+    pub denom: String,
+    pub payment_token: Option<Addr>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

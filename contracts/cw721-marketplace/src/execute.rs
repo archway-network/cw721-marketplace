@@ -1,12 +1,15 @@
 use cosmwasm_std::{
-    BankMsg, Coin, DepsMut, Env, MessageInfo, Order, Response, Uint128
+    BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, Response,
+    to_binary, WasmMsg,
 };
+
+use cw20::Cw20ExecuteMsg;
 
 use crate::state::{CW721Swap, Config, CONFIG, SWAPS, SwapType};
 use crate::utils::{
     check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };
-use crate::msg::{CancelMsg, SwapMsg, UpdateMsg};
+use crate::msg::{CancelMsg, SwapMsg, UpdateMsg, WithdrawMsg};
 use crate::error::ContractError;
 
 pub fn execute_create(
@@ -217,26 +220,46 @@ pub fn execute_update_config(
 
 pub fn execute_withdraw_fees(
     deps: DepsMut,
+    _env: Env,
     info: MessageInfo,
-    amount: Uint128,
+    msg: WithdrawMsg,
 ) -> Result<Response, ContractError> {
     let config = CONFIG.load(deps.storage)?;
+    let denom = msg.denom;
+    let amount = msg.amount;
 
     if config.admin != info.sender {
         return Err(ContractError::Unauthorized {});
     }
 
-    let transfer_result = BankMsg::Send {
-        to_address: info.sender.into(),
-        amount: ([Coin {
-            denom: config.denom,
+    let transfer_result = if msg.payment_token.is_none() {
+        let bank_transfer_msg = BankMsg::Send {
+            to_address: info.sender.into(),
+            amount: ([Coin { 
+                denom: denom.clone(), 
+                amount 
+            }]).to_vec(),
+        };
+
+        let bank_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Bank(bank_transfer_msg);
+        bank_transfer
+    } else {
+        let cw20_transfer_msg = Cw20ExecuteMsg::Transfer {
+            recipient: info.sender.into(),
             amount,
-        }])
-        .to_vec(),
+        };
+        
+        let cw20_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Wasm(WasmMsg::Execute {
+            contract_addr: msg.payment_token.unwrap().into(),
+            msg: to_binary(&cw20_transfer_msg)?,
+            funds: vec![],
+        });
+        cw20_transfer
     };
 
     Ok(Response::new()
         .add_attribute("action", "withdraw")
         .add_attribute("amount", amount.to_string())
+        .add_attribute("denom", denom)
         .add_message(transfer_result))
 }

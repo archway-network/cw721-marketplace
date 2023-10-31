@@ -16,7 +16,7 @@ use crate::integration_tests::util::{
     bank_query, create_cw20, create_cw721, create_swap_with_fees, mint_native, mock_app, query,
 };
 use crate::msg::{
-    ExecuteMsg, QueryMsg, SwapMsg,
+    ExecuteMsg, QueryMsg, SwapMsg, WithdrawMsg,
 };
 use crate::query::PageResult;
 use crate::state::{SwapType};
@@ -136,8 +136,24 @@ fn test_fees_native() {
     let balance_query: Coin = bank_query(&mut app, &swap_inst);
     assert_eq!(balance_query.amount, Uint128::from(100000000000000000_u128));
 
-    // Swap admin can withdraw their fees
-    // here
+    // swap_admin can withdraw native fees
+    let withdraw_msg = WithdrawMsg {
+        amount: Uint128::from(100000000000000000_u128), 
+        denom: String::from(DENOM),
+        payment_token: None,
+    };
+    let _res = app
+        .execute_contract(
+            swap_admin.clone(), 
+            swap_inst.clone(), 
+            &ExecuteMsg::Withdraw(withdraw_msg), 
+            &[]
+        )
+        .unwrap();
+    
+    // swap_admin received its withdrawn fees
+    let balance_query: Coin = bank_query(&mut app, &swap_admin);
+    assert_eq!(balance_query.amount, Uint128::from(100000000000000000_u128));
 }
 
 // Receive cw20 tokens and release upon approval
@@ -217,7 +233,7 @@ fn test_fees_cw20() {
         expires: None,
     };
     let _res = app
-        .execute_contract(cw20_owner.clone(), cw20, &cw20_approve_msg, &[])
+        .execute_contract(cw20_owner.clone(), cw20.clone(), &cw20_approve_msg, &[])
         .unwrap();
 
     // Buyer purchases cw721, consuming the swap
@@ -249,9 +265,34 @@ fn test_fees_cw20() {
     // swap_inst has retained its fee
     let balance_query: BalanceResponse = query(
         &mut app,
+        cw20_inst.clone(),
+        Cw20QueryMsg::Balance {
+            address: swap_inst.clone().to_string()
+        }
+    ).unwrap();
+    assert_eq!(balance_query.balance, Uint128::from(10000_u32));
+
+    // swap_admin can withdraw cw20 fees
+    let withdraw_msg = WithdrawMsg {
+        amount: Uint128::from(10000_u32), 
+        denom: String::from(DENOM),
+        payment_token: Some(cw20_inst.clone()),
+    };
+    let _res = app
+        .execute_contract(
+            swap_admin.clone(), 
+            swap_inst, 
+            &ExecuteMsg::Withdraw(withdraw_msg), 
+            &[]
+        )
+        .unwrap();
+    
+    // swap_admin received its withdrawn cw20 fees
+    let balance_query: BalanceResponse = query(
+        &mut app,
         cw20_inst,
         Cw20QueryMsg::Balance {
-            address: swap_inst.to_string()
+            address: swap_admin.to_string()
         }
     ).unwrap();
     assert_eq!(balance_query.balance, Uint128::from(10000_u32));
