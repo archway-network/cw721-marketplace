@@ -14,10 +14,13 @@ pub struct InstantiateMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
+    // Swap entry points
     Create(SwapMsg),
     Finish(SwapMsg),
     Cancel(CancelMsg),
     Update(UpdateMsg),
+
+    // Admin entry points
     UpdateConfig { config: Config, },
     Withdraw(WithdrawMsg),
 }

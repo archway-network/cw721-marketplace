@@ -55,6 +55,7 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
+        // Swap entry points
         ExecuteMsg::Create(msg) => execute_create(deps, env, info, msg),
         ExecuteMsg::Finish(msg) => execute_finish(deps, env, info, msg),
         ExecuteMsg::Update(msg) => execute_update(deps, env, info, msg),
