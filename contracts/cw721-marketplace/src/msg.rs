@@ -118,6 +118,9 @@ pub enum QueryMsg {
     /// Returns the details of the named swap, error if not created.
     /// Return type: DetailsResponse.
     Details { id: String },
+
+    /// Query Config (useful for determining parameters for ExecuteMsg::UpdateConfig)
+    Config {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]

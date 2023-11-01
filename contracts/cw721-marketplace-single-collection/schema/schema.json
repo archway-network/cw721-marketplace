@@ -600,6 +600,19 @@
             }
           },
           "additionalProperties": false
+        },
+        {
+          "description": "Query Config (useful for determining parameters for ExecuteMsg::UpdateConfig)",
+          "type": "object",
+          "required": [
+            "config"
+          ],
+          "properties": {
+            "config": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": false
         }
       ]
     },

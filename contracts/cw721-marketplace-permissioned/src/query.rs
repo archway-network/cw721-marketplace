@@ -4,7 +4,7 @@ use cosmwasm_std::{Addr, Deps, Order, StdResult, Uint128};
 use cw_storage_plus::Bound;
 
 use crate::msg::{DetailsResponse, ListResponse};
-use crate::state::{all_swap_ids, CW721Swap, SWAPS, SwapType};
+use crate::state::{all_swap_ids, Config, CONFIG, CW721Swap, SWAPS, SwapType};
 use crate::utils::{calculate_page_params, PageParams};
 
 // Pagination query result format for filtered swap queries
@@ -298,4 +298,9 @@ pub fn query_swaps_by_payment_type(
     };
 
     Ok(res)
+}
+
+pub fn query_config(deps: Deps) -> StdResult<Config> {
+    let config: Config = CONFIG.load(deps.storage)?;
+    Ok(config)
 }

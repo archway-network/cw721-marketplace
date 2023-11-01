@@ -9,8 +9,8 @@ use crate::execute::{
     execute_withdraw_fees,
 };
 use crate::query::{
-    query_details, query_list, query_swap_total, query_swaps, query_swaps_by_creator, query_swaps_by_denom,
-    query_swaps_by_payment_type, query_swaps_by_price, query_swaps_of_token,
+    query_config, query_details, query_list, query_swap_total, query_swaps, query_swaps_by_creator,
+    query_swaps_by_denom, query_swaps_by_payment_type, query_swaps_by_price, query_swaps_of_token,
 };
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 use crate::state::{Config, CONFIG, SwapType};
@@ -100,6 +100,9 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         }
         QueryMsg::SwapsByPaymentType { cw20, swap_type, page, limit } => {
             to_binary(&query_swaps_by_payment_type(deps, cw20, swap_type, page, limit)?)
+        }
+        QueryMsg::Config {} => {
+            to_binary(&query_config(deps)?)
         }
     }
 }
