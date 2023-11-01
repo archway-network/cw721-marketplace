@@ -158,7 +158,7 @@ pub fn execute_finish(
     };
 
     // Remove all swaps for this token_id 
-    // (as they're no longer invalid)
+    // (as they're no longer valid)
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
