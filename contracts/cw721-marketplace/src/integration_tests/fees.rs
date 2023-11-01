@@ -40,7 +40,7 @@ fn test_fees_native() {
     let nft = create_cw721(&mut app, &cw721_owner);
     
     // swap_admin creates the swap contract 
-    let swap = create_swap_with_fees(&mut app, &swap_admin);
+    let swap = create_swap_with_fees(&mut app, &swap_admin, 10_u64);
     let swap_inst = swap.clone();
     
     // Mint native to `arch_owner`
@@ -173,7 +173,7 @@ fn test_fees_cw20() {
     let nft = create_cw721(&mut app, &cw721_owner);
     
     // swap_admin creates the swap contract 
-    let swap = create_swap_with_fees(&mut app, &swap_admin);
+    let swap = create_swap_with_fees(&mut app, &swap_admin, 10_u64);
     let swap_inst = swap.clone();
     
     // cw20_owner creates a cw20 coin
