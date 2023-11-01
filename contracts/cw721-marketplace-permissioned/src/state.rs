@@ -15,6 +15,7 @@ pub struct Config {
     pub admin: Addr,
     pub denom: String,
     pub cw721: Vec<Addr>,
+    pub fees: u64,
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub enum SwapType {

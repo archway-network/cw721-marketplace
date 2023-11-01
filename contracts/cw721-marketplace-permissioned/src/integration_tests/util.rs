@@ -19,6 +19,7 @@ use cw721_base::{
 use crate::msg::InstantiateMsg;
 
 static DENOM: &str = "aarch";
+static NO_FEES: u64 = 0_u64;
 
 pub fn mock_app() -> App {
     App::default()
@@ -52,12 +53,26 @@ pub fn contract_cw721() -> Box<dyn Contract<Empty>> {
 }
 
 pub fn create_swap(router: &mut App, owner: &Addr, cw721: Addr) -> Addr {
-    
     let swap_id = router.store_code(contract_swap721());
     let msg = InstantiateMsg {
         admin: owner.clone(),
         denom: DENOM.into(),
         cw721: vec![cw721],
+        fee_percentage: NO_FEES.clone(),
+    };
+    let swap_addr = router
+        .instantiate_contract(swap_id, owner.clone(), &msg, &[], "swap721",None)
+        .unwrap();
+    swap_addr
+}
+
+pub fn create_swap_with_fees(router: &mut App, owner: &Addr, cw721: Addr, fees: u64) -> Addr {
+    let swap_id = router.store_code(contract_swap721());
+    let msg = InstantiateMsg {
+        admin: owner.clone(),
+        denom: DENOM.into(),
+        cw721: vec![cw721],
+        fee_percentage: fees,
     };
     let swap_addr = router
         .instantiate_contract(swap_id, owner.clone(), &msg, &[], "swap721",None)

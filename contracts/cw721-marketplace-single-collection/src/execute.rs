@@ -1,10 +1,15 @@
-use cosmwasm_std::{Coin, DepsMut, Env, MessageInfo, Order, Response};
+use cosmwasm_std::{
+    BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, Response,
+    to_binary, WasmMsg,
+};
+
+use cw20::Cw20ExecuteMsg;
 
 use crate::state::{CW721Swap, Config, CONFIG, SWAPS, SwapType};
 use crate::utils::{
-    check_sent_required_payment, query_name_owner, handle_swap_transfers,
+    check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };
-use crate::msg::{CancelMsg, SwapMsg, UpdateMsg};
+use crate::msg::{CancelMsg, SwapMsg, UpdateMsg, WithdrawMsg};
 use crate::error::ContractError;
 
 pub fn execute_create(
@@ -120,10 +125,36 @@ pub fn execute_finish(
             return Err(ContractError::InvalidInput {});
         }
     }
-  
+
+    // Calculate fee split
+    let split = if swap.payment_token.is_none() { 
+        let funds: Vec<Coin> = info.funds.into_iter()
+            .filter(|coin| { coin.denom == config.denom })
+            .collect();
+
+        fee_split(&deps, funds[0].amount).unwrap()
+    } else { 
+        fee_split(&deps, swap.price).unwrap()
+    };
+
+    // Do swap transfer
     let transfer_results = match msg.swap_type {
-        SwapType::Offer => handle_swap_transfers(&info.sender, &swap.creator, swap.clone(), &info.funds, config.denom.clone())?,
-        SwapType::Sale => handle_swap_transfers(&swap.creator, &info.sender, swap.clone(), &info.funds, config.denom.clone())?,
+        SwapType::Offer => handle_swap_transfers(
+            env,
+            &info.sender, 
+            &swap.creator, 
+            swap.clone(), 
+            config.denom.clone(),
+            split,
+        )?,
+        SwapType::Sale => handle_swap_transfers(
+            env,
+            &swap.creator, 
+            &info.sender, 
+            swap.clone(), 
+            config.denom.clone(),
+            split,
+        )?,
     };
 
     // Remove all swaps for this token_id 
@@ -184,4 +215,50 @@ pub fn execute_update_config(
     CONFIG.save(deps.storage, &config_update)?;
 
     Ok(Response::new().add_attribute("action", "update_config"))
+}
+
+pub fn execute_withdraw_fees(
+    deps: DepsMut,
+    _env: Env,
+    info: MessageInfo,
+    msg: WithdrawMsg,
+) -> Result<Response, ContractError> {
+    let config = CONFIG.load(deps.storage)?;
+    let denom = msg.denom;
+    let amount = msg.amount;
+
+    if config.admin != info.sender {
+        return Err(ContractError::Unauthorized {});
+    }
+
+    let transfer_result = if msg.payment_token.is_none() {
+        let bank_transfer_msg = BankMsg::Send {
+            to_address: info.sender.into(),
+            amount: ([Coin { 
+                denom: denom.clone(), 
+                amount 
+            }]).to_vec(),
+        };
+
+        let bank_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Bank(bank_transfer_msg);
+        bank_transfer
+    } else {
+        let cw20_transfer_msg = Cw20ExecuteMsg::Transfer {
+            recipient: info.sender.into(),
+            amount,
+        };
+
+        let cw20_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Wasm(WasmMsg::Execute {
+            contract_addr: msg.payment_token.unwrap().into(),
+            msg: to_binary(&cw20_transfer_msg)?,
+            funds: vec![],
+        });
+        cw20_transfer
+    };
+
+    Ok(Response::new()
+        .add_attribute("action", "withdraw")
+        .add_attribute("amount", amount.to_string())
+        .add_attribute("denom", denom)
+        .add_message(transfer_result))
 }

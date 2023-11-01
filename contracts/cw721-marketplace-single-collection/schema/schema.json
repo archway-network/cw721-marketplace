@@ -39,7 +39,8 @@
       "required": [
         "admin",
         "cw721",
-        "denom"
+        "denom",
+        "fees"
       ],
       "properties": {
         "admin": {
@@ -50,6 +51,11 @@
         },
         "denom": {
           "type": "string"
+        },
+        "fees": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
         }
       }
     },
@@ -122,6 +128,18 @@
             }
           },
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "withdraw"
+          ],
+          "properties": {
+            "withdraw": {
+              "$ref": "#/definitions/WithdrawMsg"
+            }
+          },
+          "additionalProperties": false
         }
       ]
     },
@@ -176,7 +194,8 @@
       "required": [
         "admin",
         "cw721",
-        "denom"
+        "denom",
+        "fee_percentage"
       ],
       "properties": {
         "admin": {
@@ -187,6 +206,11 @@
         },
         "denom": {
           "type": "string"
+        },
+        "fee_percentage": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
         }
       }
     },
@@ -655,6 +679,31 @@
         },
         "price": {
           "$ref": "#/definitions/Uint128"
+        }
+      }
+    },
+    "WithdrawMsg": {
+      "type": "object",
+      "required": [
+        "amount",
+        "denom"
+      ],
+      "properties": {
+        "amount": {
+          "$ref": "#/definitions/Uint128"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "payment_token": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Addr"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     }

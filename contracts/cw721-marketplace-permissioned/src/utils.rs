@@ -2,7 +2,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_std::{
     Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, DepsMut, Env, from_binary, QueryRequest, 
-    to_binary, StdError, StdResult, WasmMsg, WasmQuery,
+    to_binary, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
 };
 
 use cw20::Cw20ExecuteMsg;
@@ -10,7 +10,7 @@ use cw721_base::{QueryMsg as Cw721QueryMsg};
 use cw721::OwnerOfResponse;
 use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension};
 
-use crate::state::{CONFIG, CW721Swap, SwapType};
+use crate::state::{CONFIG, CW721Swap};
 use crate::error::ContractError;
 
 // Default and Max page sizes for paginated queries
@@ -24,6 +24,13 @@ pub struct PageParams {
     pub end: usize,
     pub page: u32,
     pub total: u128,
+}
+
+// Fee split result
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct FeeSplit {
+    pub marketplace: Uint128,
+    pub seller: Uint128,
 }
 
 // Read utils
@@ -165,22 +172,23 @@ pub fn check_contract_balance_ok(
 
 // Write utils
 pub fn handle_swap_transfers(
+    env: Env,
     nft_sender: &Addr,
     nft_receiver: &Addr,
     details: CW721Swap,
-    funds: &[Coin],
     denom: String,
+    fee_split: FeeSplit,
 ) -> StdResult<Vec<CosmosMsg>> {
     // cw20 swap
     let payment_callback: CosmosMsg = if details.payment_token.is_some() {
         let token_transfer_msg = Cw20ExecuteMsg::TransferFrom {
             owner: nft_receiver.to_string(),
             recipient: nft_sender.to_string(),
-            amount: details.price,
+            amount: fee_split.seller,
         };
 
         let cw20_callback: CosmosMsg = WasmMsg::Execute {
-            contract_addr: details.payment_token.unwrap().into(),
+            contract_addr: details.payment_token.clone().unwrap().into(),
             msg: to_binary(&token_transfer_msg)?,
             funds: vec![],
         }
@@ -188,13 +196,11 @@ pub fn handle_swap_transfers(
         cw20_callback
     // aarch swap
     } else {
-        let payment_funds = if details.swap_type == SwapType::Sale { funds.to_vec() } else { 
-            ([Coin {
-                denom,
-                amount: details.price,
-            }])
-            .to_vec()
-        };
+        let payment_funds = ([Coin {
+            denom,
+            amount: fee_split.seller,
+        }])
+        .to_vec();
         let aarch_transfer_msg = BankMsg::Send {
             to_address: nft_sender.to_string(),
             amount: payment_funds,
@@ -203,6 +209,22 @@ pub fn handle_swap_transfers(
         let aarch_callback: CosmosMsg = cosmwasm_std::CosmosMsg::Bank(aarch_transfer_msg);
         aarch_callback
     };
+
+    let market_callback: Option<CosmosMsg> = if details.payment_token.is_some() { 
+        let token_transfer_msg = Cw20ExecuteMsg::TransferFrom {
+            owner: nft_receiver.to_string(),
+            recipient: env.contract.address.to_string(),
+            amount: fee_split.marketplace,
+        };
+
+        let cw20_callback: CosmosMsg = WasmMsg::Execute {
+            contract_addr: details.payment_token.clone().unwrap().into(),
+            msg: to_binary(&token_transfer_msg)?,
+            funds: vec![],
+        }
+        .into();
+        Some(cw20_callback)
+    } else { None };
 
     let nft_transfer_msg = Cw721ExecuteMsg::<Extension>::TransferNft {
         recipient: nft_receiver.to_string(),
@@ -216,5 +238,26 @@ pub fn handle_swap_transfers(
     }
     .into();
 
-    Ok(vec![cw721_callback, payment_callback])
+    let mut msgs = vec![cw721_callback, payment_callback];
+    if let Some(market_callback) = market_callback { msgs.push(market_callback); }
+
+    Ok(msgs)
+}
+
+pub fn fee_split(
+    deps: &DepsMut,
+    swap_price: Uint128,
+) -> Result<FeeSplit, ContractError> {
+    let config = CONFIG.load(deps.storage)?;
+    let fees: f64 = config.fees as f64 / 100_f64;
+    let marketplace: f64 = (swap_price.u128() as f64) * fees;
+    if (marketplace as u128) >= swap_price.into() {
+        return Err(ContractError::InvalidInput {});
+    }
+    let seller: u128 = swap_price.u128() - marketplace as u128;
+    let result = FeeSplit { 
+        marketplace: Uint128::from(marketplace as u128),
+        seller: Uint128::from(seller),
+    };
+    Ok(result)
 }
