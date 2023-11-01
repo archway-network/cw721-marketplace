@@ -9,20 +9,23 @@ pub struct InstantiateMsg {
     pub admin: Addr,
     pub denom: String,
     pub cw721: Vec<Addr>,
+    pub fee_percentage: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
+    // Swap entry points
     Create(SwapMsg),
     Finish(SwapMsg),
     Cancel(CancelMsg),
     Update(UpdateMsg),
 
-    // Admin functions
+    // Admin entry points
     UpdateConfig { config: Config, },
     AddNft(UpdateNftMsg),
     RemoveNft(UpdateNftMsg),
+    Withdraw(WithdrawMsg),
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -48,6 +51,12 @@ pub struct SwapMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct UpdateNftMsg {
     pub cw721: Addr,
+}
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct WithdrawMsg { 
+    pub amount: Uint128, 
+    pub denom: String,
+    pub payment_token: Option<Addr>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

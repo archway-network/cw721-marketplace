@@ -6,7 +6,7 @@ use cosmwasm_std::{
 
 use crate::execute::{
     execute_create, execute_cancel, execute_finish, execute_update, 
-    execute_add_cw721, execute_remove_cw721, execute_update_config,
+    execute_add_cw721, execute_remove_cw721, execute_update_config, execute_withdraw_fees
 };
 use crate::query::{
     query_details, query_list, query_swap_total, query_swaps, query_swaps_by_creator, query_swaps_by_denom,
@@ -31,16 +31,21 @@ pub fn instantiate(
 ) -> Result<Response, ContractError> {
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
+    // Max fee percentage 30%
+    let fee_percentage: u64 = if msg.fee_percentage > 30 { 0_u64 } else { msg.fee_percentage };
+
     let config = Config {
         admin: msg.admin,
         denom: msg.denom.clone(),
         cw721: msg.cw721,
+        fees: fee_percentage,
     };
     CONFIG.save(deps.storage, &config)?;
 
     Ok(Response::new()
         .add_attribute("action", "instantiate")
-        .add_attribute("denom", msg.denom))
+        .add_attribute("denom", msg.denom)
+        .add_attribute("fees", msg.fee_percentage.to_string()))
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -56,10 +61,12 @@ pub fn execute(
         ExecuteMsg::Finish(msg) => execute_finish(deps, env, info, msg),
         ExecuteMsg::Update(msg) => execute_update(deps, env, info, msg),
         ExecuteMsg::Cancel(msg) => execute_cancel(deps, env, info, msg),
+        
         // Admin only entry points
         ExecuteMsg::UpdateConfig { config } => execute_update_config(deps, env, info, config),
         ExecuteMsg::AddNft(msg) => execute_add_cw721(deps, env, info, msg),
         ExecuteMsg::RemoveNft(msg) => execute_remove_cw721(deps, env, info, msg),
+        ExecuteMsg::Withdraw(msg) => execute_withdraw_fees(deps, env, info, msg),
     }
 }
 
@@ -140,6 +147,7 @@ mod tests {
             admin: Addr::unchecked(MOCK_CONTRACT_ADDR),
             denom: "aarch".into(),
             cw721: vec![Addr::unchecked(MOCK_CONTRACT_ADDR)],
+            fee_percentage: 0_u64,
         };
         let info = mock_info("anyone", &[]);
         let res = instantiate(deps.as_mut(), mock_env(), info, instantiate_msg).unwrap();
