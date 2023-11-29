@@ -244,20 +244,28 @@ pub fn handle_swap_transfers(
     Ok(msgs)
 }
 
+// XXX TODO: Fix this function to use cosmwasm_std::Decimal
+// because `f64` is not allowed in cosmwasm < 0.35
 pub fn fee_split(
-    deps: &DepsMut,
+    _deps: &DepsMut,
     swap_price: Uint128,
 ) -> Result<FeeSplit, ContractError> {
-    let config = CONFIG.load(deps.storage)?;
-    let fees: f64 = config.fees as f64 / 100_f64;
-    let marketplace: f64 = (swap_price.u128() as f64) * fees;
-    if (marketplace as u128) >= swap_price.into() {
-        return Err(ContractError::InvalidInput {});
-    }
-    let seller: u128 = swap_price.u128() - marketplace as u128;
-    let result = FeeSplit { 
-        marketplace: Uint128::from(marketplace as u128),
-        seller: Uint128::from(seller),
+    // let config = CONFIG.load(deps.storage)?;
+
+    // let fees: f64 = config.fees as f64 / 100_f64;
+    // let marketplace: f64 = (swap_price.u128() as f64) * fees;
+    // if (marketplace as u128) >= swap_price.into() {
+    //     return Err(ContractError::InvalidInput {});
+    // }
+
+    // let seller: u128 = swap_price.u128() - marketplace as u128;
+    // let result = FeeSplit { 
+    //     marketplace: Uint128::from(marketplace as u128),
+    //     seller: Uint128::from(seller),
+    // };
+    let result = FeeSplit {
+        marketplace: Uint128::from(0_u128),
+        seller: swap_price,
     };
     Ok(result)
 }
