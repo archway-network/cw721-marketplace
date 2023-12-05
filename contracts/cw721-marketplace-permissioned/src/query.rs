@@ -46,17 +46,26 @@ pub fn query_list(
     })
 }
 
-pub fn query_swap_total(deps: Deps, side: SwapType) -> StdResult<u128> {
+pub fn query_swap_total(deps: Deps, side: Option<SwapType>) -> StdResult<u128> {
+
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
 
-    let results: Vec<CW721Swap> = swaps
-        .unwrap()
-        .into_iter()
-        .map(|t| t.1)
-        .filter(|item| { item.swap_type == side })
-        .collect();
+    let results: Vec<CW721Swap> = if let Some(swap_type) = side {
+        swaps
+            .unwrap()
+            .into_iter()
+            .map(|t| t.1)
+            .filter(|item| { item.swap_type == swap_type })
+            .collect()
+    } else {
+        swaps
+            .unwrap()
+            .into_iter()
+            .map(|t| t.1)
+            .collect()
+    };
     
     Ok(results.len() as u128)
 }

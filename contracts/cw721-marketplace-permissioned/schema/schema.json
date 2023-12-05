@@ -283,12 +283,16 @@
           "properties": {
             "get_total": {
               "type": "object",
-              "required": [
-                "swap_type"
-              ],
               "properties": {
                 "swap_type": {
-                  "$ref": "#/definitions/SwapType"
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/SwapType"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               }
             }
