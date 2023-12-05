@@ -85,8 +85,8 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
         QueryMsg::GetListings { page, limit } => {
             to_binary(&query_swaps(deps, SwapType::Sale, page, limit)?)
         }
-        QueryMsg::ListingsOfToken { token_id, swap_type, page, limit } => {
-            to_binary(&query_swaps_of_token(deps, token_id, swap_type, page, limit)?)
+        QueryMsg::ListingsOfToken { token_id, cw721, swap_type, page, limit } => {
+            to_binary(&query_swaps_of_token(deps, token_id, cw721, swap_type, page, limit)?)
         }
         QueryMsg::SwapsOf { address, swap_type, page, limit } => {
             to_binary(&query_swaps_by_creator(deps, address, swap_type, page, limit)?)

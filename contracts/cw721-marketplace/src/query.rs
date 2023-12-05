@@ -91,6 +91,7 @@ pub fn query_swaps(
 pub fn query_swaps_of_token(
     deps: Deps,
     token_id: String,
+    cw721: Addr,
     side: Option<SwapType>, 
     page: Option<u32>, 
     limit: Option<u32>,
@@ -106,6 +107,7 @@ pub fn query_swaps_of_token(
             .map(|t| t.1)
             .filter(|item| {
                 item.token_id == token_id
+                && item.nft_contract == cw721
                 && item.swap_type == swap_type
             })
             .collect()
