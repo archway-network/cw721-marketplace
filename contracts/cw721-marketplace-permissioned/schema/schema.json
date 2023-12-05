@@ -367,9 +367,13 @@
             "listings_of_token": {
               "type": "object",
               "required": [
+                "cw721",
                 "token_id"
               ],
               "properties": {
+                "cw721": {
+                  "$ref": "#/definitions/Addr"
+                },
                 "limit": {
                   "type": [
                     "integer",

@@ -116,7 +116,10 @@ pub fn query_swaps_of_token(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| { item.token_id == token_id })
+            .filter(|item| { 
+                item.token_id == token_id 
+                && item.nft_contract == cw721
+            })
             .collect()
     };
 
