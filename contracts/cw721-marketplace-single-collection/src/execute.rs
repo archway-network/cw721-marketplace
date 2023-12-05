@@ -138,7 +138,7 @@ pub fn execute_finish(
     };
 
     // Do swap transfer
-    let transfer_results = match msg.swap_type {
+    let transfer_results = match swap.swap_type {
         SwapType::Offer => handle_swap_transfers(
             env,
             &info.sender, 
