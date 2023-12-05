@@ -86,6 +86,7 @@ pub enum QueryMsg {
     /// or both (`None`)
     ListingsOfToken {
         token_id: String,
+        cw721: Addr,
         swap_type: Option<SwapType>,
         page: Option<u32>,
         limit: Option<u32>,
