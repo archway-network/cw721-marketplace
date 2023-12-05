@@ -63,7 +63,7 @@ pub enum QueryMsg {
     },
     // Count total `SwapType::Offer` or `SwapType::Sale`
     GetTotal {
-        swap_type: SwapType,
+        swap_type: Option<SwapType>,
     },
     /// Get all swaps of type `SwapType::Offer`
     GetOffers {
@@ -79,6 +79,7 @@ pub enum QueryMsg {
     /// or both (`None`)
     ListingsOfToken {
         token_id: String,
+        cw721: Addr,
         swap_type: Option<SwapType>,
         page: Option<u32>,
         limit: Option<u32>,

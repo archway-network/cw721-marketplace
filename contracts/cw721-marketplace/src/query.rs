@@ -46,17 +46,25 @@ pub fn query_list(
     })
 }
 
-pub fn query_swap_total(deps: Deps, side: SwapType) -> StdResult<u128> {
+pub fn query_swap_total(deps: Deps, side: Option<SwapType>) -> StdResult<u128> {
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
 
-    let results: Vec<CW721Swap> = swaps
-        .unwrap()
-        .into_iter()
-        .map(|t| t.1)
-        .filter(|item| { item.swap_type == side })
-        .collect();
+    let results: Vec<CW721Swap> = if let Some(swap_type) = side {
+        swaps
+            .unwrap()
+            .into_iter()
+            .map(|t| t.1)
+            .filter(|item| { item.swap_type == swap_type })
+            .collect()
+    } else {
+        swaps
+            .unwrap()
+            .into_iter()
+            .map(|t| t.1)
+            .collect()
+    };
     
     Ok(results.len() as u128)
 }
@@ -91,6 +99,7 @@ pub fn query_swaps(
 pub fn query_swaps_of_token(
     deps: Deps,
     token_id: String,
+    cw721: Addr,
     side: Option<SwapType>, 
     page: Option<u32>, 
     limit: Option<u32>,
@@ -106,6 +115,7 @@ pub fn query_swaps_of_token(
             .map(|t| t.1)
             .filter(|item| {
                 item.token_id == token_id
+                && item.nft_contract == cw721
                 && item.swap_type == swap_type
             })
             .collect()
@@ -114,7 +124,10 @@ pub fn query_swaps_of_token(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| { item.token_id == token_id })
+            .filter(|item| { 
+                item.token_id == token_id 
+                && item.nft_contract == cw721
+            })
             .collect()
     };
 

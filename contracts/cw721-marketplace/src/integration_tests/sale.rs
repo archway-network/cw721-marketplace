@@ -125,6 +125,7 @@ fn test_buy_native() {
         swap_inst,
         QueryMsg::ListingsOfToken {
             token_id: token_id,
+            cw721: nft,
             swap_type: Some(SwapType::Sale),
             page: Some(1_u32),
             limit: None,

@@ -84,6 +84,7 @@ fn test_cancel_sales() {
         swap_inst.clone(),
         QueryMsg::ListingsOfToken {
             token_id: token_id.clone(),
+            cw721: nft.clone(),
             swap_type: Some(SwapType::Sale),
             page: None,
             limit: None,
@@ -104,6 +105,7 @@ fn test_cancel_sales() {
         swap_inst,
         QueryMsg::ListingsOfToken {
             token_id: token_id,
+            cw721: nft,
             swap_type: Some(SwapType::Sale),
             page: None,
             limit: None,
@@ -192,6 +194,7 @@ fn test_cancel_offers() {
         swap_inst.clone(),
         QueryMsg::ListingsOfToken {
             token_id: token_id.clone(),
+            cw721: nft.clone(),
             swap_type: Some(SwapType::Offer),
             page: None,
             limit: None,
@@ -212,6 +215,7 @@ fn test_cancel_offers() {
         swap_inst,
         QueryMsg::ListingsOfToken {
             token_id: token_id,
+            cw721: nft,
             swap_type: Some(SwapType::Offer),
             page: None,
             limit: None,

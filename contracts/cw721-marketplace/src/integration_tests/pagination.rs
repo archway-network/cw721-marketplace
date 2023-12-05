@@ -336,6 +336,7 @@ fn test_pagination() {
         swap_inst.clone(),
         QueryMsg::ListingsOfToken {
             token_id: "token10".to_string(),
+            cw721: nft.clone(),
             swap_type: None, // All Listings
             page: None,
             limit: None,
@@ -350,6 +351,7 @@ fn test_pagination() {
         swap_inst.clone(),
         QueryMsg::ListingsOfToken {
             token_id: "token10".to_string(),
+            cw721: nft.clone(),
             swap_type: Some(SwapType::Sale), // Sale Listings
             page: None,
             limit: None,
@@ -364,6 +366,7 @@ fn test_pagination() {
         swap_inst.clone(),
         QueryMsg::ListingsOfToken {
             token_id: "token10".to_string(),
+            cw721: nft,
             swap_type: Some(SwapType::Offer), // Offer Listings
             page: None,
             limit: None,
