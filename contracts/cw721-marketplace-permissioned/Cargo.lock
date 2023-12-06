@@ -312,7 +312,7 @@ dependencies = [
 
 [[package]]
 name = "cw721-marketplace-permissioned"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",

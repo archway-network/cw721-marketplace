@@ -168,11 +168,12 @@ pub fn execute_finish(
 
     // Remove all swaps for this token_id 
     // (as they're no longer valid)
+    let swap_data = swap;
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
     for swap in swaps.unwrap().iter() {
-        if swap.1.token_id == msg.token_id {
+        if swap.1.token_id == swap_data.token_id && swap.1.nft_contract == swap_data.nft_contract {
             SWAPS.remove(deps.storage, &swap.0);
         }
     }
