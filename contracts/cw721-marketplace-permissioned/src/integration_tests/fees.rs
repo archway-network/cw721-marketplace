@@ -18,7 +18,7 @@ use crate::integration_tests::util::{
 use crate::msg::{
     ExecuteMsg, QueryMsg, SwapMsg, 
     // XXX TODO (drew): fix fee splitter
-    // WithdrawMsg,
+    WithdrawMsg,
 };
 use crate::query::PageResult;
 use crate::state::{SwapType};
@@ -133,36 +133,36 @@ fn test_fees_native() {
 
     // cw721_owner has received the ARCH amount
     let balance_query: Coin = bank_query(&mut app, &cw721_owner);
-    // assert_eq!(balance_query.amount, Uint128::from(990000000000000000_u128));
+    assert_eq!(balance_query.amount, Uint128::from(990000000000000000_u128));
     // XXX TODO (drew): fix fee splitter
-    assert_eq!(balance_query.amount, Uint128::from(1000000000000000000_u128));
+    // assert_eq!(balance_query.amount, Uint128::from(1000000000000000000_u128));
     
     // swap_inst has retained its fee
     let balance_query: Coin = bank_query(&mut app, &swap_inst);
     // XXX TODO (drew): fix fee splitter
-    // assert_eq!(balance_query.amount, Uint128::from(10000000000000000_u128));
-    assert_eq!(balance_query.amount, Uint128::from(0_u128));
+    assert_eq!(balance_query.amount, Uint128::from(10000000000000000_u128));
+    // assert_eq!(balance_query.amount, Uint128::from(0_u128));
 
     // swap_admin can withdraw native fees
     // XXX TODO (drew): fix fee splitter
-    // let withdraw_msg = WithdrawMsg {
-    //     amount: Uint128::from(10000000000000000_u128), 
-    //     denom: String::from(DENOM),
-    //     payment_token: None,
-    // };
-    // let _res = app
-    //     .execute_contract(
-    //         swap_admin.clone(), 
-    //         swap_inst.clone(), 
-    //         &ExecuteMsg::Withdraw(withdraw_msg), 
-    //         &[]
-    //     )
-    //     .unwrap();
+    let withdraw_msg = WithdrawMsg {
+        amount: Uint128::from(10000000000000000_u128), 
+        denom: String::from(DENOM),
+        payment_token: None,
+    };
+    let _res = app
+        .execute_contract(
+            swap_admin.clone(), 
+            swap_inst.clone(), 
+            &ExecuteMsg::Withdraw(withdraw_msg), 
+            &[]
+        )
+        .unwrap();
     
     // swap_admin received its withdrawn fees
     // XXX TODO (drew): fix fee splitter
-    // let balance_query: Coin = bank_query(&mut app, &swap_admin);
-    // assert_eq!(balance_query.amount, Uint128::from(10000000000000000_u128));
+    let balance_query: Coin = bank_query(&mut app, &swap_admin);
+    assert_eq!(balance_query.amount, Uint128::from(10000000000000000_u128));
 }
 
 // Receive cw20 tokens and release upon approval
@@ -269,9 +269,9 @@ fn test_fees_cw20() {
             address: cw721_owner.to_string()
         }
     ).unwrap();
-    // assert_eq!(balance_query.balance, Uint128::from(99000_u32));
+    assert_eq!(balance_query.balance, Uint128::from(99000_u32));
     // XXX TODO (drew): fix fee splitter
-    assert_eq!(balance_query.balance, Uint128::from(100000_u32));
+    // assert_eq!(balance_query.balance, Uint128::from(100000_u32));
 
     // swap_inst has retained its fee
     let balance_query: BalanceResponse = query(
@@ -282,33 +282,33 @@ fn test_fees_cw20() {
         }
     ).unwrap();
     // XXX TODO (drew): fix fee splitter
-    // assert_eq!(balance_query.balance, Uint128::from(1000_u32));
-    assert_eq!(balance_query.balance, Uint128::from(0_u32));
+    assert_eq!(balance_query.balance, Uint128::from(1000_u32));
+    // assert_eq!(balance_query.balance, Uint128::from(0_u32));
 
     // swap_admin can withdraw cw20 fees
     // XXX TODO (drew): fix fee splitter
-    // let withdraw_msg = WithdrawMsg {
-    //     amount: Uint128::from(1000_u32),
-    //     denom: String::from(DENOM),
-    //     payment_token: Some(cw20_inst.clone()),
-    // };
-    // let _res = app
-    //     .execute_contract(
-    //         swap_admin.clone(), 
-    //         swap_inst, 
-    //         &ExecuteMsg::Withdraw(withdraw_msg), 
-    //         &[]
-    //     )
-    //     .unwrap();
+    let withdraw_msg = WithdrawMsg {
+        amount: Uint128::from(1000_u32),
+        denom: String::from(DENOM),
+        payment_token: Some(cw20_inst.clone()),
+    };
+    let _res = app
+        .execute_contract(
+            swap_admin.clone(), 
+            swap_inst, 
+            &ExecuteMsg::Withdraw(withdraw_msg), 
+            &[]
+        )
+        .unwrap();
     
     // swap_admin received its withdrawn cw20 fees
     // XXX TODO (drew): fix fee splitter
-    // let balance_query: BalanceResponse = query(
-    //     &mut app,
-    //     cw20_inst,
-    //     Cw20QueryMsg::Balance {
-    //         address: swap_admin.to_string()
-    //     }
-    // ).unwrap();
-    // assert_eq!(balance_query.balance, Uint128::from(1000_u32));
+    let balance_query: BalanceResponse = query(
+        &mut app,
+        cw20_inst,
+        Cw20QueryMsg::Balance {
+            address: swap_admin.to_string()
+        }
+    ).unwrap();
+    assert_eq!(balance_query.balance, Uint128::from(1000_u32));
 }
