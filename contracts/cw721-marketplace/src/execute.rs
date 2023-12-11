@@ -134,7 +134,7 @@ pub fn execute_finish(
             .collect();
         
         fee_split(&deps, funds[0].amount).unwrap()
-    } else { 
+    } else {
         fee_split(&deps, swap.price).unwrap()
     };
 

@@ -1,8 +1,8 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_std::{
-    Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, DepsMut, Env, from_binary, QueryRequest, 
-    to_binary, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
+    Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, Decimal, DepsMut, Env, from_binary, 
+    QueryRequest, to_binary, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
 };
 
 use cw20::Cw20ExecuteMsg;
@@ -249,14 +249,21 @@ pub fn fee_split(
     swap_price: Uint128,
 ) -> Result<FeeSplit, ContractError> {
     let config = CONFIG.load(deps.storage)?;
-    let fees: f64 = config.fees as f64 / 100_f64;
-    let marketplace: f64 = (swap_price.u128() as f64) * fees;
-    if (marketplace as u128) >= swap_price.into() {
+    // Convert fees to decimal percentange
+    let fees = Decimal::percent(config.fees);
+
+    // Calculate retained fees
+    let marketplace = Decimal::from_ratio(
+        fees.atomics(),
+        swap_price
+    );
+    if (marketplace.atomics()) >= swap_price.into() {
         return Err(ContractError::InvalidInput {});
     }
-    let seller: u128 = swap_price.u128() - marketplace as u128;
+
+    let seller: u128 = swap_price.u128() - marketplace.atomics().u128();
     let result = FeeSplit { 
-        marketplace: Uint128::from(marketplace as u128),
+        marketplace: marketplace.atomics(),
         seller: Uint128::from(seller),
     };
     Ok(result)
