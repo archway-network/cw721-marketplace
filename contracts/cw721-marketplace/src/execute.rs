@@ -1,6 +1,6 @@
 use cosmwasm_std::{
     BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, Response,
-    to_binary, WasmMsg,
+    to_json_binary, WasmMsg,
 };
 
 use cw20::Cw20ExecuteMsg;
@@ -134,7 +134,7 @@ pub fn execute_finish(
             .collect();
         
         fee_split(&deps, funds[0].amount).unwrap()
-    } else { 
+    } else {
         fee_split(&deps, swap.price).unwrap()
     };
 
@@ -160,11 +160,12 @@ pub fn execute_finish(
 
     // Remove all swaps for this token_id 
     // (as they're no longer valid)
+    let swap_data = swap;
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
     for swap in swaps.unwrap().iter() {
-        if swap.1.token_id == msg.token_id {
+        if swap.1.token_id == swap_data.token_id && swap.1.nft_contract == swap_data.nft_contract {
             SWAPS.remove(deps.storage, &swap.0);
         }
     }
@@ -251,7 +252,7 @@ pub fn execute_withdraw_fees(
         
         let cw20_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Wasm(WasmMsg::Execute {
             contract_addr: msg.payment_token.unwrap().into(),
-            msg: to_binary(&cw20_transfer_msg)?,
+            msg: to_json_binary(&cw20_transfer_msg)?,
             funds: vec![],
         });
         cw20_transfer

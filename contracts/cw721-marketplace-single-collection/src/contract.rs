@@ -1,7 +1,7 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
     Binary, Deps, DepsMut, entry_point, Env, MessageInfo, Reply, Response, StdResult, 
-    SubMsgResult, to_binary,
+    SubMsgResult, to_json_binary,
 };
 
 use crate::execute::{
@@ -72,37 +72,37 @@ pub fn execute(
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::List { start_after, limit } => {
-            to_binary(&query_list(deps, start_after, limit)?)
+            to_json_binary(&query_list(deps, start_after, limit)?)
         },
         QueryMsg::Details { id } => {
-            to_binary(&query_details(deps, id)?)
+            to_json_binary(&query_details(deps, id)?)
         },
         QueryMsg::GetTotal { swap_type } => {
-            to_binary(&query_swap_total(deps, swap_type)?)
+            to_json_binary(&query_swap_total(deps, swap_type)?)
         },
         QueryMsg::GetOffers { page, limit } => {
-            to_binary(&query_swaps(deps, SwapType::Offer, page, limit)?)
+            to_json_binary(&query_swaps(deps, SwapType::Offer, page, limit)?)
         },
         QueryMsg::GetListings { page, limit } => {
-            to_binary(&query_swaps(deps, SwapType::Sale, page, limit)?)
+            to_json_binary(&query_swaps(deps, SwapType::Sale, page, limit)?)
         }
         QueryMsg::ListingsOfToken { token_id, swap_type, page, limit } => {
-            to_binary(&query_swaps_of_token(deps, token_id, swap_type, page, limit)?)
+            to_json_binary(&query_swaps_of_token(deps, token_id, swap_type, page, limit)?)
         }
         QueryMsg::SwapsOf { address, swap_type, page, limit } => {
-            to_binary(&query_swaps_by_creator(deps, address, swap_type, page, limit)?)
+            to_json_binary(&query_swaps_by_creator(deps, address, swap_type, page, limit)?)
         }
         QueryMsg::SwapsByPrice { min, max, swap_type, page, limit } => {
-            to_binary(&query_swaps_by_price(deps, min, max, swap_type, page, limit)?)
+            to_json_binary(&query_swaps_by_price(deps, min, max, swap_type, page, limit)?)
         }
         QueryMsg::SwapsByDenom { payment_token, swap_type, page, limit } => {
-            to_binary(&query_swaps_by_denom(deps, payment_token, swap_type, page, limit)?)
+            to_json_binary(&query_swaps_by_denom(deps, payment_token, swap_type, page, limit)?)
         }
         QueryMsg::SwapsByPaymentType { cw20, swap_type, page, limit } => {
-            to_binary(&query_swaps_by_payment_type(deps, cw20, swap_type, page, limit)?)
+            to_json_binary(&query_swaps_by_payment_type(deps, cw20, swap_type, page, limit)?)
         }
         QueryMsg::Config {} => {
-            to_binary(&query_config(deps)?)
+            to_json_binary(&query_config(deps)?)
         }
     }
 }
