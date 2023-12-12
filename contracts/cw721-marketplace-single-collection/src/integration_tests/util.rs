@@ -4,8 +4,8 @@ use std::collections::HashSet;
 use serde::{de::DeserializeOwned, Serialize};
 
 use cosmwasm_std::{
-    Addr, BalanceResponse as BalanceResponseBank, BankQuery, Coin, Empty, from_binary, Querier, QueryRequest, 
-    StdError, to_binary, Uint128, WasmQuery,
+    Addr, BalanceResponse as BalanceResponseBank, BankQuery, Coin, Empty, from_json, Querier, QueryRequest, 
+    StdError, to_json_binary, Uint128, WasmQuery,
 };
 use cw_multi_test::{
     App, Contract, ContractWrapper, Executor,
@@ -139,7 +139,7 @@ pub fn query<M,T>(router: &mut App, target_contract: Addr, msg: M) -> Result<T, 
     {
         router.wrap().query(&QueryRequest::Wasm(WasmQuery::Smart {
             contract_addr: target_contract.to_string(),
-            msg: to_binary(&msg).unwrap(),
+            msg: to_json_binary(&msg).unwrap(),
         }))
     }
 
@@ -148,8 +148,8 @@ pub fn bank_query(app: &App, address: &Addr) -> Coin {
         address: address.to_string(), 
         denom: DENOM.to_string() 
     });
-    let res = app.raw_query(&to_binary(&req).unwrap()).unwrap().unwrap();
-    let balance: BalanceResponseBank = from_binary(&res).unwrap();
+    let res = app.raw_query(&to_json_binary(&req).unwrap()).unwrap().unwrap();
+    let balance: BalanceResponseBank = from_json(&res).unwrap();
     return balance.amount;
 }
 

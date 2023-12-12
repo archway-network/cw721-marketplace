@@ -1,6 +1,6 @@
 use cosmwasm_std::{
     BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, Response,
-    to_binary, WasmMsg,
+    to_json_binary, WasmMsg,
 };
 
 use cw20::Cw20ExecuteMsg;
@@ -250,7 +250,7 @@ pub fn execute_withdraw_fees(
 
         let cw20_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Wasm(WasmMsg::Execute {
             contract_addr: msg.payment_token.unwrap().into(),
-            msg: to_binary(&cw20_transfer_msg)?,
+            msg: to_json_binary(&cw20_transfer_msg)?,
             funds: vec![],
         });
         cw20_transfer
