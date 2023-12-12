@@ -1,8 +1,8 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_std::{
-    Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, Decimal, DepsMut, Env, from_binary, 
-    QueryRequest, to_binary, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
+    Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, Decimal, DepsMut, Env, from_json, 
+    QueryRequest, to_json_binary, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
 };
 
 use cw20::Cw20ExecuteMsg;
@@ -45,7 +45,7 @@ pub fn query_name_owner(
     };
     let req = QueryRequest::Wasm(WasmQuery::Smart {
         contract_addr: cw721.to_string(),
-        msg: to_binary(&query_msg).unwrap(),
+        msg: to_json_binary(&query_msg).unwrap(),
     });
     let res: OwnerOfResponse = deps.querier.query(&req)?;
     Ok(res)
@@ -160,8 +160,8 @@ pub fn check_contract_balance_ok(
         address: swap_instance.to_string(),
         denom: required_denom,
     });
-    let res = deps.querier.raw_query(&to_binary(&req).unwrap()).unwrap().unwrap();
-    let query: BalanceResponse = from_binary(&res).unwrap();
+    let res = deps.querier.raw_query(&to_json_binary(&req).unwrap()).unwrap().unwrap();
+    let query: BalanceResponse = from_json(res).unwrap();
     let balance: Coin = query.amount;
     if balance.amount.u128() < required_amount {
         return Err(ContractError::InsufficientBalance {});
@@ -189,7 +189,7 @@ pub fn handle_swap_transfers(
 
         let cw20_callback: CosmosMsg = WasmMsg::Execute {
             contract_addr: details.payment_token.clone().unwrap().into(),
-            msg: to_binary(&token_transfer_msg)?,
+            msg: to_json_binary(&token_transfer_msg)?,
             funds: vec![],
         }
         .into();
@@ -219,7 +219,7 @@ pub fn handle_swap_transfers(
 
         let cw20_callback: CosmosMsg = WasmMsg::Execute {
             contract_addr: details.payment_token.clone().unwrap().into(),
-            msg: to_binary(&token_transfer_msg)?,
+            msg: to_json_binary(&token_transfer_msg)?,
             funds: vec![],
         }
         .into();
@@ -233,7 +233,7 @@ pub fn handle_swap_transfers(
 
     let cw721_callback: CosmosMsg = WasmMsg::Execute {
         contract_addr: details.nft_contract.to_string(),
-        msg: to_binary(&nft_transfer_msg)?,
+        msg: to_json_binary(&nft_transfer_msg)?,
         funds: vec![],
     }
     .into();
@@ -249,22 +249,21 @@ pub fn fee_split(
     swap_price: Uint128,
 ) -> Result<FeeSplit, ContractError> {
     let config = CONFIG.load(deps.storage)?;
-    // Convert fees to decimal percentange
-    let fees = Decimal::percent(config.fees);
-
-    // Calculate retained fees
-    let marketplace = Decimal::from_ratio(
-        fees.atomics(),
-        swap_price
-    );
-    if (marketplace.atomics()) >= swap_price.into() {
+    let marketplace: Uint128 = fee_percentage(swap_price, config.fees);
+    if marketplace.u128() >= swap_price.into() {
         return Err(ContractError::InvalidInput {});
     }
-
-    let seller: u128 = swap_price.u128() - marketplace.atomics().u128();
+    let seller: Uint128 = Uint128::from(swap_price.u128() - marketplace.u128());
     let result = FeeSplit { 
-        marketplace: marketplace.atomics(),
-        seller: Uint128::from(seller),
+        marketplace,
+        seller,
     };
     Ok(result)
+}
+
+pub fn fee_percentage(amount: Uint128, share_percent: u64) -> Uint128 {
+    let share = Decimal::percent(share_percent);
+    let amount_decimal = Decimal::from_atomics(amount, 0).unwrap();
+    let fee = amount_decimal * share;
+    fee.to_uint_floor()
 }
