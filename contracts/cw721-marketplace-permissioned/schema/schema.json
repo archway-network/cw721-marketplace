@@ -83,7 +83,7 @@
           ],
           "properties": {
             "finish": {
-              "$ref": "#/definitions/SwapMsg"
+              "$ref": "#/definitions/FinishSwapMsg"
             }
           },
           "additionalProperties": false
@@ -215,6 +215,17 @@
           "additionalProperties": false
         }
       ]
+    },
+    "FinishSwapMsg": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
     },
     "InstantiateMsg": {
       "type": "object",

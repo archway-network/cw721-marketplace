@@ -9,7 +9,9 @@ use crate::state::{CW721Swap, Config, CONFIG, SWAPS, SwapType};
 use crate::utils::{
     check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };
-use crate::msg::{CancelMsg, SwapMsg, UpdateMsg, UpdateNftMsg, WithdrawMsg};
+use crate::msg::{
+    CancelMsg, FinishSwapMsg, SwapMsg, UpdateMsg, UpdateNftMsg, WithdrawMsg
+};
 use crate::error::ContractError;
 
 pub fn execute_create(
@@ -40,6 +42,7 @@ pub fn execute_create(
         return Err(ContractError::InvalidPaymentToken {});
     }
     let swap = CW721Swap {
+        id: msg.id.clone(),
         creator: info.sender,
         nft_contract: msg.cw721,
         payment_token: msg.payment_token,
@@ -63,6 +66,7 @@ pub fn execute_create(
 
     Ok(Response::new()
         .add_attribute("action", "create")
+        .add_attribute("swap", msg.id)
         .add_attribute("token_id", swap.token_id)
         .add_attribute("payment_token", payment_token)
         .add_attribute("price", swap.price))
@@ -85,6 +89,7 @@ pub fn execute_update(
     // payment_token and swap_type should not be updatable
     // E.g. only price and expiration can be modified
     let swap = CW721Swap {
+        id: swap.id,
         creator: swap.creator,
         nft_contract: swap.nft_contract,
         payment_token: swap.payment_token,
@@ -107,7 +112,7 @@ pub fn execute_finish(
     deps: DepsMut,
     env: Env,
     info: MessageInfo,
-    msg: SwapMsg,
+    msg: FinishSwapMsg,
 ) -> Result<Response, ContractError> {
     let config = CONFIG.load(deps.storage)?;
     let swap = SWAPS.load(deps.storage, &msg.id)?;
@@ -116,7 +121,7 @@ pub fn execute_finish(
         return Err(ContractError::Expired {});
     }
     // If no cw721 permission, revert
-    if !config.cw721.contains(&msg.cw721) {
+    if !config.cw721.contains(&swap.nft_contract) {
         return Err(ContractError::Unauthorized {});
     }
 
@@ -168,7 +173,7 @@ pub fn execute_finish(
 
     // Remove all swaps for this token_id 
     // (as they're no longer valid)
-    let swap_data = swap;
+    let swap_data = swap.clone();
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
@@ -178,17 +183,17 @@ pub fn execute_finish(
         }
     }
     
-    let payment_token: String = if msg.payment_token.is_some() {
-        msg.payment_token.unwrap().to_string()
+    let payment_token: String = if swap.payment_token.is_some() {
+        swap.payment_token.unwrap().to_string()
     } else {
         config.denom
     };
 
     Ok(Response::new()
         .add_attribute("action", "finish")
-        .add_attribute("token_id", msg.token_id)
+        .add_attribute("token_id", swap.token_id)
         .add_attribute("payment_token", payment_token)
-        .add_attribute("price", msg.price)
+        .add_attribute("price", swap.price)
         .add_messages(transfer_results))
 }
 
