@@ -66,7 +66,7 @@ pub fn execute_create(
 
     Ok(Response::new()
         .add_attribute("action", "create")
-        .add_attribute("swap", msg.id)
+        .add_attribute("swap_id", msg.id)
         .add_attribute("token_id", swap.token_id)
         .add_attribute("payment_token", payment_token)
         .add_attribute("price", swap.price))
@@ -191,6 +191,7 @@ pub fn execute_finish(
 
     Ok(Response::new()
         .add_attribute("action", "finish")
+        .add_attribute("swap_id", swap.id)
         .add_attribute("token_id", swap.token_id)
         .add_attribute("payment_token", payment_token)
         .add_attribute("price", swap.price)
