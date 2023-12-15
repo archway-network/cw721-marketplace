@@ -17,7 +17,7 @@ pub struct InstantiateMsg {
 pub enum ExecuteMsg {
     // Swap entry points
     Create(SwapMsg),
-    Finish(SwapMsg),
+    Finish(FinishSwapMsg),
     Cancel(CancelMsg),
     Update(UpdateMsg),
 
@@ -45,6 +45,11 @@ pub struct SwapMsg {
     pub price: Uint128,
     pub swap_type: SwapType,
 }
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct FinishSwapMsg {
+    pub id: String,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct WithdrawMsg { 
     pub amount: Uint128, 
