@@ -16,7 +16,7 @@ use crate::integration_tests::util::{
     create_cw20, create_cw721, create_swap, mock_app, query,
 };
 use crate::msg::{
-    ExecuteMsg, SwapMsg,
+    ExecuteMsg, FinishSwapMsg, SwapMsg,
 };
 use crate::state::{SwapType};
 
@@ -85,7 +85,9 @@ fn test_cw20_offer_accepted() {
         price: Uint128::from(100000_u32),
         swap_type: SwapType::Offer,
     };
-    let finish_msg = creation_msg.clone();
+    let finish_msg = FinishSwapMsg {
+        id: creation_msg.id.clone(),
+    };
 
     let _res = app
         .execute_contract(cw20_owner.clone(), swap_inst.clone(), &ExecuteMsg::Create(creation_msg), &[])

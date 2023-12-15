@@ -16,7 +16,7 @@ use crate::integration_tests::util::{
     bank_query, create_cw20, create_cw721, create_swap, mint_native, mock_app, query,
 };
 use crate::msg::{
-    ExecuteMsg, SwapMsg,
+    ExecuteMsg, FinishSwapMsg, SwapMsg,
 };
 use crate::state::{SwapType};
 
@@ -72,7 +72,9 @@ fn test_overpayment_native() {
         price: Uint128::from(1000000000000000000_u128), // 1 ARCH as aarch
         swap_type: SwapType::Sale,
     };
-    let finish_msg = creation_msg.clone();
+    let finish_msg = FinishSwapMsg {
+        id: creation_msg.id.clone(),
+    };
 
     // Seller (cw721_owner) must approve the swap contract to spend their NFT
     let nft_approve_msg = Cw721ExecuteMsg::Approve::<Extension> {
@@ -240,7 +242,9 @@ fn test_overpayment_cw20() {
         price: Uint128::from(100000_u32),
         swap_type:SwapType::Offer,
     };
-    let finish_msg = creation_msg.clone();
+    let finish_msg = FinishSwapMsg {
+        id: creation_msg.id.clone(),
+    };
 
     // Seller (cw721_owner) must approve the swap contract to spend their NFT
     let nft_approve_msg = Cw721ExecuteMsg::Approve::<Extension> {

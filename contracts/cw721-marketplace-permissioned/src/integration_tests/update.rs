@@ -49,7 +49,7 @@ fn test_updating_sales() {
         .execute_contract(cw721_owner.clone(), nft.clone(), &mint_msg, &[])
         .unwrap();
 
-    // Create a SwapMsg for creating / finishing a swap
+    // Create a SwapMsg for creating
     let swap_id: String = "firstswap".to_string();
     let creation_msg = SwapMsg {
         id: swap_id.clone(),

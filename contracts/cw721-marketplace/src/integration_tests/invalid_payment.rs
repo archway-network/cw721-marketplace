@@ -16,7 +16,7 @@ use crate::integration_tests::util::{
     bank_query, create_cw20, create_cw721, create_swap, mint_native, mock_app, query,
 };
 use crate::msg::{
-    ExecuteMsg, SwapMsg,
+    ExecuteMsg, FinishSwapMsg, SwapMsg,
 };
 use crate::state::{SwapType};
 
@@ -71,7 +71,9 @@ fn test_invalid_payment_native() {
         price: Uint128::from(5000000000000000000_u128), // 5 ARCH as aarch
         swap_type: SwapType::Sale,
     };
-    let finish_msg = creation_msg.clone();
+    let finish_msg = FinishSwapMsg {
+        id: creation_msg.id.clone(),
+    };
 
     // Seller (cw721_owner) must approve the swap contract to spend their NFT
     let nft_approve_msg = Cw721ExecuteMsg::Approve::<Extension> {
@@ -256,7 +258,9 @@ fn test_invalid_payment_cw20() {
         price: Uint128::from(100000_u32),
         swap_type:SwapType::Offer,
     };
-    let finish_msg = creation_msg.clone();
+    let finish_msg = FinishSwapMsg {
+        id: creation_msg.id.clone(),
+    };
 
     // Seller (cw721_owner) must approve the swap contract to spend their NFT
     let nft_approve_msg = Cw721ExecuteMsg::Approve::<Extension> {
@@ -368,7 +372,9 @@ fn test_invalid_payment_cw20_offer() {
         price: Uint128::from(100000_u32),
         swap_type: SwapType::Offer,
     };
-    let finish_msg = creation_msg.clone();
+    let finish_msg = FinishSwapMsg {
+        id: creation_msg.id.clone(),
+    };
 
     let _res = app
         .execute_contract(cw20_owner.clone(), swap_inst.clone(), &ExecuteMsg::Create(creation_msg), &[])
