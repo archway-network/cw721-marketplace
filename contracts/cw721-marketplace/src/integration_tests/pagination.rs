@@ -175,6 +175,7 @@ fn test_pagination() {
         QueryMsg::SwapsOf {
             address: cw721_owner.clone(),
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: None,
             limit: None,
         }
@@ -186,6 +187,7 @@ fn test_pagination() {
         QueryMsg::SwapsOf {
             address: cw721_owner.clone(),
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: Some(1_u32),
             limit: None,
         }
@@ -216,6 +218,7 @@ fn test_pagination() {
             min: Some(Uint128::from(0_u128)),
             max: Some(Uint128::from(1000000000000000000_u128)),
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: None,
             limit: None,
         }
@@ -228,6 +231,7 @@ fn test_pagination() {
             min: Some(Uint128::from(0_u128)),
             max: Some(Uint128::from(1000000000000000000_u128)),
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: Some(1_u32),
             limit: None,
         }
@@ -257,6 +261,7 @@ fn test_pagination() {
         QueryMsg::SwapsByDenom {
             payment_token: None,
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: None,
             limit: None,
         }
@@ -268,6 +273,7 @@ fn test_pagination() {
         QueryMsg::SwapsByDenom {
             payment_token: None,
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: Some(1_u32),
             limit: None,
         }
@@ -298,6 +304,7 @@ fn test_pagination() {
         QueryMsg::SwapsByPaymentType {
             cw20: false,
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: None,
             limit: None,
         }
@@ -309,6 +316,7 @@ fn test_pagination() {
         QueryMsg::SwapsByPaymentType {
             cw20: false,
             swap_type: Some(SwapType::Sale),
+            cw721: None,
             page: Some(1_u32),
             limit: None,
         }

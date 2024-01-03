@@ -439,6 +439,16 @@
                 "address": {
                   "$ref": "#/definitions/Addr"
                 },
+                "cw721": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/Addr"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "limit": {
                   "type": [
                     "integer",
@@ -480,6 +490,16 @@
             "swaps_by_price": {
               "type": "object",
               "properties": {
+                "cw721": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/Addr"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "limit": {
                   "type": [
                     "integer",
@@ -541,6 +561,16 @@
             "swaps_by_denom": {
               "type": "object",
               "properties": {
+                "cw721": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/Addr"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "limit": {
                   "type": [
                     "integer",
@@ -597,6 +627,16 @@
               "properties": {
                 "cw20": {
                   "type": "boolean"
+                },
+                "cw721": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/Addr"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "limit": {
                   "type": [
