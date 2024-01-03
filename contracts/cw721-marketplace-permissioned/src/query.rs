@@ -146,6 +146,7 @@ pub fn query_swaps_by_creator(
     deps: Deps, 
     address: Addr,
     swap_type: Option<SwapType>,
+    cw721: Option<Addr>,
     page: Option<u32>,
     limit: Option<u32>,
 ) -> StdResult<PageResult> {
@@ -154,15 +155,28 @@ pub fn query_swaps_by_creator(
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
 
-    let results: Vec<CW721Swap> = swaps
-        .unwrap()
-        .into_iter()
-        .map(|t| t.1)
-        .filter(|item| {
-            item.creator == address
-            && item.swap_type == side
-        })
-        .collect();
+    let results: Vec<CW721Swap> = if let Some(contract) = cw721 {
+        swaps
+            .unwrap()
+            .into_iter()
+            .map(|t| t.1)
+            .filter(|item| {
+                item.creator == address
+                && item.swap_type == side
+                && item.nft_contract == contract
+            })
+            .collect()
+    } else {
+        swaps
+            .unwrap()
+            .into_iter()
+            .map(|t| t.1)
+            .filter(|item| {
+                item.creator == address
+                && item.swap_type == side
+            })
+            .collect()
+    };
 
     let paging: PageParams = calculate_page_params(page, limit, results.len() as u32)?;
     let res = PageResult {
@@ -179,6 +193,7 @@ pub fn query_swaps_by_price(
     min: Option<Uint128>, 
     max: Option<Uint128>, 
     swap_type: Option<SwapType>,
+    cw721: Option<Addr>,
     page: Option<u32>,
     limit: Option<u32>,
 ) -> StdResult<PageResult> {
@@ -189,7 +204,7 @@ pub fn query_swaps_by_price(
         .collect();
 
     // With Max range filter
-    let results: Vec<CW721Swap> = if let Some(max_value) = max {
+    let mut results: Vec<CW721Swap> = if let Some(max_value) = max {
         swaps
             .unwrap()
             .into_iter()
@@ -212,6 +227,18 @@ pub fn query_swaps_by_price(
             .collect()
     };
 
+    // If limited to a collection scope
+    results = if let Some(contract) = cw721 {
+        results
+            .into_iter()
+            .filter(|item| {
+                item.nft_contract == contract  
+            })
+            .collect()
+    } else {
+        results
+    };
+
     let paging: PageParams = calculate_page_params(page, limit, results.len() as u32)?;
     let res = PageResult {
         swaps: results[paging.start..paging.end].to_vec(),
@@ -226,6 +253,7 @@ pub fn query_swaps_by_denom(
     deps: Deps, 
     payment_token: Option<Addr>, 
     swap_type: Option<SwapType>,
+    cw721: Option<Addr>,
     page: Option<u32>,
     limit: Option<u32>,
 ) -> StdResult<PageResult> {
@@ -235,7 +263,7 @@ pub fn query_swaps_by_denom(
         .collect();
 
     // Requested cw20 denom
-    let results: Vec<CW721Swap> = if let Some(token_addr) = payment_token {
+    let mut results: Vec<CW721Swap> = if let Some(token_addr) = payment_token {
         swaps
             .unwrap()
             .into_iter()
@@ -258,6 +286,18 @@ pub fn query_swaps_by_denom(
             .collect()
     };
 
+    // If limited to a collection scope
+    results = if let Some(contract) = cw721 {
+        results
+            .into_iter()
+            .filter(|item| {
+                item.nft_contract == contract  
+            })
+            .collect()
+    } else {
+        results
+    };
+
     let paging: PageParams = calculate_page_params(page, limit, results.len() as u32)?;
     let res = PageResult {
         swaps: results[paging.start..paging.end].to_vec(),
@@ -272,6 +312,7 @@ pub fn query_swaps_by_payment_type(
     deps: Deps, 
     cw20: bool,
     swap_type: Option<SwapType>,
+    cw721: Option<Addr>,
     page: Option<u32>,
     limit: Option<u32>,
 ) -> StdResult<PageResult> {
@@ -281,7 +322,7 @@ pub fn query_swaps_by_payment_type(
         .collect();
 
     // cw20 swap
-    let results: Vec<CW721Swap> = if cw20 {
+    let mut results: Vec<CW721Swap> = if cw20 {
         swaps
             .unwrap()
             .into_iter()
@@ -302,6 +343,18 @@ pub fn query_swaps_by_payment_type(
                 && item.swap_type == side
             })
             .collect()
+    };
+
+    // If limited to a collection scope
+    results = if let Some(contract) = cw721 {
+        results
+            .into_iter()
+            .filter(|item| {
+                item.nft_contract == contract  
+            })
+            .collect()
+    } else {
+        results
     };
 
     let paging: PageParams = calculate_page_params(page, limit, results.len() as u32)?;
