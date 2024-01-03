@@ -94,6 +94,7 @@ pub enum QueryMsg {
     SwapsOf { 
         address: Addr,
         swap_type: Option<SwapType>,
+        cw721: Option<Addr>,
         page: Option<u32>,
         limit: Option<u32>,
     },
@@ -102,6 +103,7 @@ pub enum QueryMsg {
         min: Option<Uint128>,
         max: Option<Uint128>,
         swap_type: Option<SwapType>,
+        cw721: Option<Addr>,
         page: Option<u32>,
         limit: Option<u32>,
     },
@@ -110,6 +112,7 @@ pub enum QueryMsg {
     SwapsByDenom {
         payment_token: Option<Addr>,
         swap_type: Option<SwapType>,
+        cw721: Option<Addr>,
         page: Option<u32>,
         limit: Option<u32>,
     },
@@ -117,6 +120,7 @@ pub enum QueryMsg {
     SwapsByPaymentType {
         cw20: bool,
         swap_type: Option<SwapType>,
+        cw721: Option<Addr>,
         page: Option<u32>,
         limit: Option<u32>,
     },
