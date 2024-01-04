@@ -277,7 +277,7 @@ pub fn execute_remove_cw721(
     CONFIG.save(deps.storage, &config)?;
 
     Ok(Response::new()
-        .add_attribute("action", "add_cw721")
+        .add_attribute("action", "remove_cw721")
         .add_attribute("cw721", msg.cw721))
 }
 
