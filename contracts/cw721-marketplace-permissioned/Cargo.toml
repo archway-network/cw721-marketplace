@@ -1,6 +1,6 @@
 [package]
 name = "cw721-marketplace-permissioned"
-version = "0.1.4"
+version = "0.1.5"
 authors = [
   "johhonn <jjj.may377@gmail.com>",
   "Drew Taylor <drew.taylor@philabs.xyz>"

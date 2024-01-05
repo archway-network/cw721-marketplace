@@ -210,7 +210,7 @@ pub fn handle_swap_transfers(
         aarch_callback
     };
 
-    let market_callback: Option<CosmosMsg> = if details.payment_token.is_some() { 
+    let market_callback: Option<CosmosMsg> = if details.payment_token.is_some() && fee_split.marketplace.u128() > 0 { 
         let token_transfer_msg = Cw20ExecuteMsg::TransferFrom {
             owner: nft_receiver.to_string(),
             recipient: env.contract.address.to_string(),
@@ -239,7 +239,7 @@ pub fn handle_swap_transfers(
     .into();
 
     let mut msgs = vec![cw721_callback, payment_callback];
-    if let Some(market_callback) = market_callback { msgs.push(market_callback); }
+    if let Some(fees) = market_callback { msgs.push(fees); }
 
     Ok(msgs)
 }
