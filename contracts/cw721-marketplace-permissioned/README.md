@@ -1,8 +1,12 @@
 # CW721 Permissioned Marketplace
-Allows for the listing and offering on NFTs. This particular contract supports multiple NFT collections in a 
-permissioned manner, meaning that the admin decides which collections are allowed on the marketplace.
+Permits the listing and offering on NFTs. 
+This contract supports multiple NFT collections in a permissioned manner, 
+allowing admin decision on which collections are allowed on the marketplace.
 
 # Index
+<details>
+<summary>Expand</summary>
+
 <!-- TOC -->
 * [CW721 Permissioned Marketplace](#cw721-permissioned-marketplace)
 * [Index](#index)
@@ -28,12 +32,15 @@ permissioned manner, meaning that the admin decides which collections are allowe
     * [SwapsByPaymentType](#swapsbypaymenttype)
     * [Details](#details)
     * [Config](#config)
+  * [PageResult](#pageresult)
+  * [CW721Swap](#cw721swap)
   * [Expiration](#expiration)
     * [AtHeight](#atheight)
     * [AtTime](#attime)
     * [Never](#never)
   * [SwapType](#swaptype)
 <!-- TOC -->
+</details>
 
 ## Instantiation
 
@@ -155,52 +162,170 @@ Get all pending swaps
 | start_after | Optional String | Limit which ID to start after  |
 | limit       | Optional number | Limit how many swaps to return |
 
-#### Returns
+<details>
+<summary>Result</summary>
 
 | Name  | Type         | Description      |
 |-------|--------------|------------------|
 | swaps | String array | List of swap IDs |
 
+</details>
 
 ---
 ### GetTotal
-#### Returns
+Count total listings, supports counting a specific  type of listing, returns a number
+
+| Name      | Type                           | Description      |
+|-----------|--------------------------------|------------------|
+| swap_type | Optional [SwapType](#SwapType) | Swap type filter |
 
 ---
 ### GetOffers
-#### Returns
+
+| Name  | Type            | Description            |
+|-------|-----------------|------------------------|
+| page  | Optional number | Pagination             |
+| limit | Optional number | Limit how many results |
+
+Returns a list of [PageResult](#PageResult)
 
 ---
 ### GetListings
-#### Returns
+| Name  | Type            | Description            |
+|-------|-----------------|------------------------|
+| page  | Optional number | Pagination             |
+| limit | Optional number | Limit how many results |
+
+Returns a list of [PageResult](#PageResult)
 
 ---
 ### ListingsOfToken
-#### Returns
+
+| Name      | Type                           | Description            |
+|-----------|--------------------------------|------------------------|
+| token_id  | String                         | NFT ID                 |
+| swap_type | Optional [SwapType](#SwapType) | Swap type filter       |
+| cw721     | Optional String(Address)       | NFT collection filter  |
+| page      | Optional number                | Pagination             |
+| limit     | Optional number                | Limit how many results |
+
+
+Returns a list of [PageResult](#PageResult)
 
 ---
 ### SwapsOf
-#### Returns
+
+| Name      | Type                           | Description                         |
+|-----------|--------------------------------|-------------------------------------|
+| address   | String(Address)                | Swaps created by a specific address |
+| swap_type | Optional [SwapType](#SwapType) | Swap type filter                    |
+| cw721     | Optional String(Address)       | NFT collection filter               |
+| page      | Optional number                | Pagination                          |
+| limit     | Optional number                | Limit how many results              |
+
+Returns a list of [PageResult](#PageResult)
 
 ---
 ### SwapsByPrice
-#### Returns
+
+| Name      | Type                           | Description             |
+|-----------|--------------------------------|-------------------------|
+| min       | Optional String(number)        | Minimum price to return |
+| max       | Optional String(number)        | Maximum price to return |
+| swap_type | Optional [SwapType](#SwapType) | Swap type filter        |
+| cw721     | Optional String(Address)       | NFT collection filter   |
+| page      | Optional number                | Pagination              |
+| limit     | Optional number                | Limit how many results  |
+
+Returns a list of [PageResult](#PageResult)
 
 ---
 ### SwapsByDenom
-#### Returns
+
+| Name          | Type                           | Description            |
+|---------------|--------------------------------|------------------------|
+| payment_token | Optional String(Address)       | Filter by CW20 token   |
+| swap_type     | Optional [SwapType](#SwapType) | Swap type filter       |
+| cw721         | Optional String(Address)       | NFT collection filter  |
+| page          | Optional number                | Pagination             |
+| limit         | Optional number                | Limit how many results |
+
+Returns a list of [PageResult](#PageResult)
 
 ---
 ### SwapsByPaymentType
-#### Returns
+
+| Name      | Type                           | Description            |
+|-----------|--------------------------------|------------------------|
+| cw20      | bool                           | Filter payment type    |
+| swap_type | Optional [SwapType](#SwapType) | Swap type filter       |
+| cw721     | Optional String(Address)       | NFT collection filter  |
+| page      | Optional number                | Pagination             |
+| limit     | Optional number                | Limit how many results |
+
+Returns a list of [PageResult](#PageResult)
 
 ---
 ### Details
-#### Returns
+Return the details of the specified listing
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| id   | String | Listing ID  |
+
+<details>
+<summary>Result</summary>
+
+| Name          | Type                      | Description                 |
+|---------------|---------------------------|-----------------------------|
+| creator       | String(Address)           | Listing creator             |
+| contract      | String(Address)           | NFT Collection              |
+| payment_token | Optional String(Address)  | Cw20 token if applicable    |
+| token_id      | String                    | NFT ID                      |
+| expires       | [Expiration](#Expiration) | Listing expiration date     |
+| price         | String(Number)            | Amount offered or requested |
+| swap_types    | [SwapType](#SwapType)     | Listing type                |
+
+
+</details>
 
 ---
 ### Config
-#### Returns
+Query the contract's config, returns:
+
+| Name           | Type                  | Description                                |
+|----------------|-----------------------|--------------------------------------------|
+| admin          | String(Address)       | Address allowed to do privileged messages  |
+| denom          | String                | Token denom for native token listings      |
+| cw721          | String(Address) Array | NFT Collections allowed in the marketplace |
+| fee_percentage | u64                   | Percentage fee cut, ie: 1 = 1%             |
+
+---
+
+## PageResult
+
+| Name  | Type                             | Description           |
+|-------|----------------------------------|-----------------------|
+| swaps | Array of [CW721Swap](#CW721Swap) | Queried items         |
+| page  | number                           | Current page          |
+| total | number                           | Total values returned |
+
+
+---
+
+## CW721Swap
+
+| Name          | Type                      | Description                 |
+|---------------|---------------------------|-----------------------------|
+| id            | String                    | Listing ID                  |
+| creator       | String(Address)           | Creator address             |
+| nft_contract  | String(Address)           | NFT collection              |
+| payment_token | Optional String(Address)  | CW20 contract               |
+| token_id      | String                    | NFT ID                      |
+| expires       | [Expiration](#Expiration) | Listing expiration date     |
+| price         | String(Number)            | Requested or offered amount |
+| swap_type     | [SwapType](#SwapType)     | Listing type                |
+
 
 ---
 
