@@ -148,7 +148,19 @@ Withdraw tokens earned by the contract through sale fees
 ## Queries
 
 ### List
+Get all pending swaps
+
+| Name        | Type            | Description                    |
+|-------------|-----------------|--------------------------------|
+| start_after | Optional String | Limit which ID to start after  |
+| limit       | Optional number | Limit how many swaps to return |
+
 #### Returns
+
+| Name  | Type         | Description      |
+|-------|--------------|------------------|
+| swaps | String array | List of swap IDs |
+
 
 ---
 ### GetTotal
