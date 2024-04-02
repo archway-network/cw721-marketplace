@@ -2,13 +2,12 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use cosmwasm_std::{
-    BlockInfo, Addr, Order, Uint128, Storage, StdResult,
+    Addr, Order, Storage, StdResult,
 };
 use cw_storage_plus::{
     Bound, Item, Map,
 };
 
-use cw20::{Expiration};
 use utils::prelude::CW721Swap;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
