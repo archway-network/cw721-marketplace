@@ -66,6 +66,8 @@ Each type of listing has specific caveats that must be followed to meet the orig
 | price         | String(Uint128)           | When a sale its the requested amount, when its an offer its the offered amount |
 | swap_type     | [SwapType](#SwapType)     | The type of listing                                                            |
 
+---
+
 ### Finish
 Finalize the listing. Permission to do this varies depending the listing type.
 
@@ -80,6 +82,7 @@ Finalize the listing. Permission to do this varies depending the listing type.
 |------|--------|-------------------|
 | id   | String | Sale / Offer swap |
 
+---
 
 ### Cancel
 Cancels the listing, can only be triggered by listing creator.
@@ -87,6 +90,8 @@ Cancels the listing, can only be triggered by listing creator.
 | Name | Type   | Description       |
 |------|--------|-------------------|
 | id   | String | Sale / Offer swap |
+
+---
 
 ### Update
 Update the listing, can only be triggered by listing creator.
@@ -96,6 +101,8 @@ Update the listing, can only be triggered by listing creator.
 | id      | String                    | Sale / Offer swap                                                              |
 | expires | [Expiration](#Expiration) | When the listing will expire                                                   |
 | price   | String(Uint128)           | When a sale its the requested amount, when its an offer its the offered amount |
+
+---
 
 ### UpdateConfig - Permissioned
 Updates the contract config set at instantiation.
@@ -107,6 +114,8 @@ Updates the contract config set at instantiation.
 | cw721          | String(Address) Array | NFT Collections allowed in the marketplace |
 | fee_percentage | u64                   | Percentage fee cut, ie: 1 = 1%             |
 
+---
+
 ### AddNft - Permissioned
 Add an allowed NFT contract to be offered in the marketplace
 
@@ -114,6 +123,7 @@ Add an allowed NFT contract to be offered in the marketplace
 |-------|-----------------|-----------------------|
 | cw721 | String(Address) | NFT collection to add |
 
+---
 
 ### RemoveNft - Permissioned
 Remove an allowed NFT contract from the marketplace
@@ -121,6 +131,8 @@ Remove an allowed NFT contract from the marketplace
 | Name  | Type            | Description                |
 |-------|-----------------|----------------------------|
 | cw721 | String(Address) | NFT collection to withdraw |
+
+---
 
 ### Withdraw - Permissioned
 Withdraw tokens earned by the contract through sale fees
@@ -131,23 +143,58 @@ Withdraw tokens earned by the contract through sale fees
 | denom         | String                   | Native coin denom                      |
 | payment_token | Optional String(Address) | Optional cw20 address to withdraw from |
 
+---
 
 ## Queries
 
 ### List
+#### Returns
+
+---
 ### GetTotal
+#### Returns
+
+---
 ### GetOffers
+#### Returns
+
+---
 ### GetListings
+#### Returns
+
+---
 ### ListingsOfToken
+#### Returns
+
+---
 ### SwapsOf
+#### Returns
+
+---
 ### SwapsByPrice
+#### Returns
+
+---
 ### SwapsByDenom
+#### Returns
+
+---
 ### SwapsByPaymentType
+#### Returns
+
+---
 ### Details
+#### Returns
+
+---
 ### Config
+#### Returns
+
+---
 
 ## Expiration
 When something can expire, the contents can be one of three.
+
 ### AtHeight
 Will expire when given height is greater or equal than the current block height
 ```json
@@ -169,6 +216,8 @@ Will never expire
 ```json
 "never"
 ```
+
+---
 
 ## SwapType
 Represents the type of transaction going through, can be one of `Offer` which is an offer to someone's NFT and `Sale`
