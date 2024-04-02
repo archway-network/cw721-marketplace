@@ -2,18 +2,11 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_std::{Addr, Deps, Order, StdResult, Uint128};
 use cw_storage_plus::Bound;
+use utils::prelude::{CW721Swap, PageResult, SwapType};
 
-use crate::msg::{DetailsResponse, ListResponse};
-use crate::state::{all_swap_ids, Config, CONFIG, CW721Swap, SWAPS, SwapType};
+use utils::prelude::{DetailsResponse, ListResponse};
+use crate::state::{all_swap_ids, Config, CONFIG, SWAPS};
 use crate::utils::{calculate_page_params, PageParams};
-
-// Pagination query result format for filtered swap queries
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct PageResult {
-    pub swaps: Vec<CW721Swap>,
-    pub page: u32,
-    pub total: u128,
-}
 
 // Default and Max page sizes for paginated queries
 const MAX_LIMIT: u32 = 100;
