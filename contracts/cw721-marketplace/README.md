@@ -30,6 +30,7 @@ This contract supports multiple NFT collections.
     * [Details](#details)
     * [Config](#config)
   * [PageResult](#pageresult)
+  * [ListResponse](#listresponse)
   * [CW721Swap](#cw721swap)
   * [Expiration](#expiration)
     * [AtHeight](#atheight)
@@ -83,7 +84,7 @@ Finalize the listing. Permission to do this varies depending the listing type.
 
 | Name | Type   | Description       |
 |------|--------|-------------------|
-| id   | String | Sale / Offer swap |
+| id   | String | Listing ID |
 
 ---
 
@@ -92,7 +93,7 @@ Cancels the listing, can only be triggered by listing creator.
 
 | Name | Type   | Description       |
 |------|--------|-------------------|
-| id   | String | Sale / Offer swap |
+| id   | String | Listing ID |
 
 ---
 
@@ -101,7 +102,7 @@ Update the listing, can only be triggered by listing creator.
 
 | Name    | Type                      | Description                                                                    |
 |---------|---------------------------|--------------------------------------------------------------------------------|
-| id      | String                    | Sale / Offer swap                                                              |
+| id      | String                    | Listing ID                                                              |
 | expires | [Expiration](#Expiration) | When the listing will expire                                                   |
 | price   | String(Uint128)           | When a sale its the requested amount, when its an offer its the offered amount |
 
@@ -140,14 +141,7 @@ Get all pending swaps
 | start_after | Optional String | Limit which ID to start after  |
 | limit       | Optional number | Limit how many swaps to return |
 
-<details>
-<summary>Result</summary>
-
-| Name  | Type         | Description      |
-|-------|--------------|------------------|
-| swaps | String array | List of swap IDs |
-
-</details>
+Returns [ListResponse](#ListResponse)
 
 ---
 ### GetTotal
@@ -156,6 +150,8 @@ Count total listings, supports counting a specific  type of listing, returns a n
 | Name      | Type                           | Description      |
 |-----------|--------------------------------|------------------|
 | swap_type | Optional [SwapType](#SwapType) | Swap type filter |
+
+Returns a number representing total swaps
 
 ---
 ### GetOffers
@@ -283,10 +279,18 @@ Query the contract's config, returns
 
 | Name  | Type                             | Description           |
 |-------|----------------------------------|-----------------------|
-| swaps | Array of [CW721Swap](#CW721Swap) | Queried items         |
+| swaps | Array of [CW721Swap](#CW721Swap) | Query result          |
 | page  | number                           | Current page          |
 | total | number                           | Total values returned |
 
+
+---
+
+## ListResponse
+
+| Name  | Type         | Description      |
+|-------|--------------|------------------|
+| swaps | String array | List of swap IDs |
 
 ---
 
