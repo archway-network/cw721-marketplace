@@ -1,6 +1,5 @@
 mod swap;
 mod query;
-mod msgs;
 
 pub mod prelude {
     pub use crate::swap::{CW721Swap, SwapType};
