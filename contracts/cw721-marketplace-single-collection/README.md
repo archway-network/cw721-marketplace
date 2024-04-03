@@ -301,7 +301,7 @@ Query the contract's config, returns:
 ---
 
 ## Expiration
-When something can expire, the contents can be one of three.
+When something can expire, the contents can be one of three. [Source](https://docs.rs/cw20/0.13.4/cw20/enum.Expiration.html)
 
 ### AtHeight
 Will expire when given height is greater or equal than the current block height
