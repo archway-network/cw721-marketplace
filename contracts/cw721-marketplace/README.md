@@ -281,7 +281,7 @@ Query the contract's config, returns
 |-------|----------------------------------|-----------------------|
 | swaps | Array of [CW721Swap](#CW721Swap) | Query result          |
 | page  | number                           | Current page          |
-| total | number                           | Total values returned |
+| total | number                           | Total items present in contract |
 
 
 ---
