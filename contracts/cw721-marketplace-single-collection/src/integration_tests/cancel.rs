@@ -10,6 +10,7 @@ use cw20::{
 use cw721_base::{
     msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg,
 };
+use utils::prelude::PageResult;
 
 use crate::integration_tests::util::{
     create_cw20, create_cw721, create_swap, mock_app, query,
@@ -18,7 +19,6 @@ use crate::msg::{
     CancelMsg, ExecuteMsg, QueryMsg, SwapMsg,
 };
 use crate::state::SwapType;
-use crate::query::PageResult;
 
 // Seller must be able to cancel sale
 // cw20 and native ARCH

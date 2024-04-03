@@ -9,6 +9,7 @@ use cw_storage_plus::{
 };
 
 use utils::prelude::CW721Swap;
+pub use utils::prelude::SwapType;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct Config {
