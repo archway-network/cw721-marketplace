@@ -28,3 +28,10 @@ cw721 = "0.13.4"
 schemars = "0.8"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = "1.0"
+
+[workspace.metadata.scripts]
+schema = """
+cargo run --example schema --manifest-path ./contracts/cw721-marketplace/Cargo.toml &&
+cargo run --example schema --manifest-path ./contracts/cw721-marketplace-permissioned/Cargo.toml &&
+cargo run --example schema --manifest-path ./contracts/cw721-marketplace-single-collection/Cargo.toml
+"""
