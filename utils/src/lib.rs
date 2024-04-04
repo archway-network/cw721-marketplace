@@ -37,8 +37,20 @@ mod test {
         let expected = Uint128::new(50000000000000000000000000000000000000);
         assert_eq!(fee_percentage(amount, 50), expected);
 
+        // Testing for overflow
         fee_percentage(Uint128::MAX, 1);
         fee_percentage(Uint128::MAX, 0);
         fee_percentage(Uint128::MAX, 100);
+
+        // Testing for underflow
+        assert_eq!(fee_percentage(Uint128::one(), 0), Uint128::zero());
+        assert_eq!(fee_percentage(Uint128::one(), 1), Uint128::zero());
+        assert_eq!(fee_percentage(Uint128::one(), 10), Uint128::zero());
+        assert_eq!(fee_percentage(Uint128::one(), 100), Uint128::one());
+
+        assert_eq!(fee_percentage(Uint128::zero(), 0), Uint128::zero());
+        assert_eq!(fee_percentage(Uint128::zero(), 1), Uint128::zero());
+        assert_eq!(fee_percentage(Uint128::zero(), 10), Uint128::zero());
+        assert_eq!(fee_percentage(Uint128::zero(), 100), Uint128::zero());
     }
 }
