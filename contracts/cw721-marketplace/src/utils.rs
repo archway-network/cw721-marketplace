@@ -9,6 +9,7 @@ use cw20::Cw20ExecuteMsg;
 use cw721_base::{QueryMsg as Cw721QueryMsg};
 use cw721::OwnerOfResponse;
 use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension};
+use utils::fee_percentage;
 use utils::prelude::CW721Swap;
 
 use crate::state::{CONFIG};
@@ -260,11 +261,4 @@ pub fn fee_split(
         seller,
     };
     Ok(result)
-}
-
-pub fn fee_percentage(amount: Uint128, share_percent: u64) -> Uint128 {
-    let share = Decimal::percent(share_percent);
-    let amount_decimal = Decimal::from_atomics(amount, 0).unwrap();
-    let fee = amount_decimal * share;
-    fee.to_uint_floor()
 }
