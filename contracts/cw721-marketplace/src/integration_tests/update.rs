@@ -10,12 +10,13 @@ use cw20::{
 use cw721_base::{
     msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg,
 };
+use utils::prelude::DetailsResponse;
 
 use crate::integration_tests::util::{
     create_cw20, create_cw721, create_swap, mock_app, query,
 };
 use crate::msg::{
-    DetailsResponse, ExecuteMsg, QueryMsg, SwapMsg, UpdateMsg,
+    ExecuteMsg, QueryMsg, SwapMsg, UpdateMsg,
 };
 use crate::state::{SwapType};
 

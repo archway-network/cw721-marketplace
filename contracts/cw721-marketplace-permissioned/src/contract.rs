@@ -13,10 +13,11 @@ use crate::query::{
     query_swaps_by_denom, query_swaps_by_payment_type, query_swaps_by_price, query_swaps_of_token,
 };
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
-use crate::state::{Config, CONFIG, SwapType};
+use crate::state::{Config, CONFIG};
 use crate::error::ContractError;
 
 use cw2::{get_contract_version, set_contract_version};
+use utils::prelude::SwapType;
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:archid-marketplace";

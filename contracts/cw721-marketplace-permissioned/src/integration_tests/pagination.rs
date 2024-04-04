@@ -8,15 +8,15 @@ use cw20::Expiration;
 use cw721_base::{
     msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg,
 };
+use utils::prelude::{ListResponse, PageResult};
 
 use crate::integration_tests::util::{
     create_cw721, create_swap, has_unique_elements, mock_app, query,
 };
 use crate::msg::{
-    ExecuteMsg, ListResponse, QueryMsg, SwapMsg,
+    ExecuteMsg, QueryMsg, SwapMsg,
 };
 use crate::state::SwapType;
-use crate::query::PageResult;
 
 // Listing swaps and querying filter entry points must be enumerable,
 // and must return correct results, totals, and page for all page sizes

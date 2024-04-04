@@ -11,6 +11,7 @@ use cw721_base::{
     msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg, msg::QueryMsg as Cw721QueryMsg,
 };
 use cw721::OwnerOfResponse;
+use utils::prelude::PageResult;
 
 use crate::integration_tests::util::{
     bank_query, create_cw20, create_cw721, create_swap_with_fees, mint_native, mock_app, query,
@@ -18,7 +19,6 @@ use crate::integration_tests::util::{
 use crate::msg::{
     ExecuteMsg, FinishSwapMsg, QueryMsg, SwapMsg, WithdrawMsg,
 };
-use crate::query::PageResult;
 use crate::state::{SwapType};
 
 static DENOM: &str = "aarch";

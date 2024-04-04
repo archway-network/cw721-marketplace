@@ -4,8 +4,9 @@ use cosmwasm_std::{
 };
 
 use cw20::Cw20ExecuteMsg;
+use utils::prelude::{CW721Swap, SwapType};
 
-use crate::state::{CW721Swap, Config, CONFIG, SWAPS, SwapType};
+use crate::state::{Config, CONFIG, SWAPS};
 use crate::utils::{
     check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };

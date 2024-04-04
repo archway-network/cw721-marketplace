@@ -2,7 +2,8 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_std::{Addr, Uint128};
 use cw20::Expiration;
-use crate::state::{Config,SwapType};
+use utils::prelude::SwapType;
+use crate::state::{Config};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {
@@ -131,21 +132,3 @@ pub enum QueryMsg {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct MigrateMsg {}
-
-// List swaps
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct ListResponse {
-    pub swaps: Vec<String>,
-}
-
-// Get details about a swap
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct DetailsResponse {
-    pub creator: Addr,
-    pub contract: Addr,
-    pub payment_token: Option<Addr>,
-    pub token_id: String,    
-    pub expires: Expiration,    
-    pub price: Uint128,
-    pub swap_type: SwapType,
-}

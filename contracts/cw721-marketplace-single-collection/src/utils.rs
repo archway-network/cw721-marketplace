@@ -9,8 +9,9 @@ use cw20::Cw20ExecuteMsg;
 use cw721_base::{QueryMsg as Cw721QueryMsg};
 use cw721::OwnerOfResponse;
 use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension};
+use utils::prelude::CW721Swap;
 
-use crate::state::{CONFIG, CW721Swap};
+use crate::state::{CONFIG};
 use crate::error::ContractError;
 
 // Default and Max page sizes for paginated queries
