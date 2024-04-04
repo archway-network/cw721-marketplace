@@ -14,7 +14,8 @@ pub fn fee_percentage(amount: Uint128, share_percent: u64) -> Uint128 {
     let amount = Uint256::from_uint128(amount) * Uint256::from_u128(100);
 
     // Get percentage and divide by 10 ** 4 (both decimal spots added up)
-    let fee = (amount * Uint256::from(share_percent)) / Uint256::from(10000u16);
+    let fee = (amount * Uint256::from(share_percent))
+        .checked_div(Uint256::from(10000u16)).unwrap_or(Uint256::zero());
 
     // We can safely unwrap since we've tested against u128::MAX
     fee.try_into().unwrap()
