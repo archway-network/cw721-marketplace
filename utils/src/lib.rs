@@ -1,4 +1,4 @@
-use cosmwasm_std::{Decimal, Uint128, Uint256};
+use cosmwasm_std::{Uint128, Uint256};
 
 mod swap;
 mod query;
@@ -16,7 +16,7 @@ pub fn fee_percentage(amount: Uint128, share_percent: u64) -> Uint128 {
     // Get percentage and divide by 10 ** 4 (both decimal spots added up)
     let fee = (amount * Uint256::from(share_percent)) / Uint256::from(10000u16);
 
-    // We can safely unwrap since weve tested against u128::MAX
+    // We can safely unwrap since we've tested against u128::MAX
     fee.try_into().unwrap()
 }
 
