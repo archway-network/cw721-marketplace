@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_std::{
-    Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, Decimal, DepsMut, Env, from_json, 
+    Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, DepsMut, Env, from_json,
     QueryRequest, to_json_binary, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
 };
 
@@ -9,7 +9,7 @@ use cw20::Cw20ExecuteMsg;
 use cw721_base::{QueryMsg as Cw721QueryMsg};
 use cw721::OwnerOfResponse;
 use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension};
-use utils::fee_percentage;
+use utils::{fee_percentage, FeeSplit};
 use utils::prelude::CW721Swap;
 
 use crate::state::{CONFIG};
@@ -26,13 +26,6 @@ pub struct PageParams {
     pub end: usize,
     pub page: u32,
     pub total: u128,
-}
-
-// Fee split result
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct FeeSplit {
-    pub marketplace: Uint128,
-    pub seller: Uint128,
 }
 
 // Read utils

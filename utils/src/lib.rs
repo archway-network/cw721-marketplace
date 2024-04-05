@@ -1,4 +1,6 @@
 use cosmwasm_std::{Uint128, Uint256};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 mod swap;
 mod query;
@@ -7,6 +9,22 @@ pub mod prelude {
     pub use crate::swap::{CW721Swap, SwapType};
     pub use crate::query::{PageResult, ListResponse, DetailsResponse};
     pub use crate::fee_percentage;
+}
+
+// Fee split result
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub struct FeeSplit {
+    pub marketplace: Uint128,
+    pub seller: Uint128,
+}
+
+impl FeeSplit {
+    pub fn only_seller(amount: Uint128) -> Self {
+        Self {
+            marketplace: Uint128::zero(),
+            seller: amount
+        }
+    }
 }
 
 pub fn fee_percentage(amount: Uint128, share_percent: u64) -> Uint128 {
