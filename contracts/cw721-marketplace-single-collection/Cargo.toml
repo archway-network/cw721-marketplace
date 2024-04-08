@@ -50,3 +50,4 @@ utils = { path = "../../utils" }
 [dev-dependencies]
 cosmwasm-schema.workspace = true
 cw-multi-test.workspace = true
+rstest.workspace = true

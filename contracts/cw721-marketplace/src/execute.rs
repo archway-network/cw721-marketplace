@@ -4,6 +4,7 @@ use cosmwasm_std::{
 };
 
 use cw20::Cw20ExecuteMsg;
+use utils::FeeSplit;
 use utils::prelude::{CW721Swap, SwapType};
 
 use crate::state::{Config, CONFIG, SWAPS};
@@ -139,9 +140,9 @@ pub fn execute_finish(
             .filter(|coin| { coin.denom == config.denom })
             .collect();
         
-        fee_split(&deps, funds[0].amount).unwrap()
+        fee_split(&deps, funds[0].amount).unwrap_or(FeeSplit::only_seller(funds[0].amount))
     } else {
-        fee_split(&deps, swap.price).unwrap()
+        fee_split(&deps, swap.price).unwrap_or(FeeSplit::only_seller(swap.price))
     };
 
     // Do swap transfer

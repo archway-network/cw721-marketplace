@@ -11,6 +11,7 @@ use cw721_base::{
     msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg, msg::QueryMsg as Cw721QueryMsg,
 };
 use cw721::OwnerOfResponse;
+use rstest::rstest;
 use utils::prelude::PageResult;
 
 use crate::integration_tests::util::{
@@ -25,10 +26,19 @@ static DENOM: &str = "aarch";
 
 // Swap buyer pays with ARCH
 // ensuring marketplace fees are respected
-#[test]
-fn test_fees_native() {
+#[rstest]
+#[case(10, false, 20, 2)]
+#[case(100, true, 22, 22)]
+#[case(1000, true, 15, 150)]
+#[case(10000, true, 30, 3000)]
+#[case(100000, true, 5, 5000)]
+#[case(u128::MAX, false, 10, 34028236692093846346337460743176821145)]
+fn test_fees_native(#[case] amount: u128, #[case] in_arch: bool, #[case] fee_split: u64, #[case] expected: u128) {
     let mut app = mock_app();
-    
+
+    let amount = if in_arch { amount * 10u128.pow(18) } else { amount };
+    let expected = if in_arch { expected * 10u128.pow(18) } else { expected };
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -40,14 +50,14 @@ fn test_fees_native() {
     let nft = create_cw721(&mut app, &cw721_owner);
     
     // swap_admin creates the swap contract 
-    let swap = create_swap_with_fees(&mut app, &swap_admin, nft.clone(), 3_u64); // 3% Marketplace fees
+    let swap = create_swap_with_fees(&mut app, &swap_admin, nft.clone(), fee_split); // 3% Marketplace fees
     let swap_inst = swap.clone();
     
     // Mint native to `arch_owner`
     mint_native(
         &mut app,
         arch_owner.to_string(),
-        Uint128::from(10000000000000000000_u128), // 10 ARCH as aarch
+        Uint128::from(amount), // 10 ARCH as aarch
     );
 
     // cw721_owner mints a cw721 
@@ -69,7 +79,7 @@ fn test_fees_native() {
         payment_token: None,
         token_id: token_id.clone(),    
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
-        price: Uint128::from(1000000000000000000_u128), // 1 ARCH as aarch
+        price: Uint128::from(amount), // 1 ARCH as aarch
         swap_type: SwapType::Sale,
     };
     let finish_msg = FinishSwapMsg {
@@ -99,7 +109,7 @@ fn test_fees_native() {
             &ExecuteMsg::Finish(finish_msg), 
             &[Coin {
                 denom: String::from(DENOM),
-                amount: Uint128::from(1000000000000000000_u128)
+                amount: Uint128::from(amount)
             }]
         )
         .unwrap();
@@ -131,15 +141,15 @@ fn test_fees_native() {
 
     // cw721_owner has received the ARCH amount
     let balance_query: Coin = bank_query(&mut app, &cw721_owner);
-    assert_eq!(balance_query.amount, Uint128::from(970000000000000000_u128));
+    assert_eq!(balance_query.amount, Uint128::from(amount - expected));
     
     // swap_inst has retained its fee
     let balance_query: Coin = bank_query(&mut app, &swap_inst);
-    assert_eq!(balance_query.amount, Uint128::from(30000000000000000_u128));
+    assert_eq!(balance_query.amount, Uint128::from(expected));
 
     // swap_admin can withdraw native fees
     let withdraw_msg = WithdrawMsg {
-        amount: Uint128::from(30000000000000000_u128), 
+        amount: Uint128::from(expected),
         denom: String::from(DENOM),
         payment_token: None,
     };
@@ -154,15 +164,24 @@ fn test_fees_native() {
     
     // swap_admin received its withdrawn fees
     let balance_query: Coin = bank_query(&mut app, &swap_admin);
-    assert_eq!(balance_query.amount, Uint128::from(30000000000000000_u128));
+    assert_eq!(balance_query.amount, Uint128::from(expected));
 }
 
 // Receive cw20 tokens and release upon approval
 // ensuring marketplace fees are respected
-#[test]
-fn test_fees_cw20() {
+#[rstest]
+#[case(10, false, 20, 2)]
+#[case(100, true, 22, 22)]
+#[case(1000, true, 15, 150)]
+#[case(10000, true, 30, 3000)]
+#[case(100000, true, 5, 5000)]
+#[case(u128::MAX, false, 10, 34028236692093846346337460743176821145)]
+fn test_fees_cw20(#[case] amount: u128, #[case] in_arch: bool, #[case] fee_split: u64, #[case] expected: u128) {
     let mut app = mock_app();
-    
+
+    let amount = if in_arch { amount * 10u128.pow(18) } else { amount };
+    let expected = if in_arch { expected * 10u128.pow(18) } else { expected };
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -174,7 +193,7 @@ fn test_fees_cw20() {
     let nft = create_cw721(&mut app, &cw721_owner);
     
     // swap_admin creates the swap contract 
-    let swap = create_swap_with_fees(&mut app, &swap_admin, nft.clone(), 3_u64); // 3% Marketplace fees
+    let swap = create_swap_with_fees(&mut app, &swap_admin, nft.clone(), fee_split); // 3% Marketplace fees
     let swap_inst = swap.clone();
     
     // cw20_owner creates a cw20 coin
@@ -183,7 +202,7 @@ fn test_fees_cw20() {
         &cw20_owner,
         "testcw".to_string(),
         "tscw".to_string(),
-        Uint128::from(100000_u32)
+        Uint128::from(amount)
     );
     let cw20_inst = cw20.clone();
 
@@ -206,7 +225,7 @@ fn test_fees_cw20() {
         payment_token: Some(Addr::unchecked(cw20.clone())),
         token_id: token_id.clone(),    
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
-        price: Uint128::from(100000_u32),
+        price: Uint128::from(amount),
         swap_type: SwapType::Sale,
     };
     let finish_msg = FinishSwapMsg {
@@ -231,7 +250,7 @@ fn test_fees_cw20() {
     // cw721 buyer (cw20_owner) must approve swap contract to spend their cw20
     let cw20_approve_msg = Cw20ExecuteMsg::IncreaseAllowance {
         spender: swap.to_string(),
-        amount:  Uint128::from(100000_u32),
+        amount:  Uint128::from(amount),
         expires: None,
     };
     let _res = app
@@ -262,7 +281,7 @@ fn test_fees_cw20() {
             address: cw721_owner.to_string()
         }
     ).unwrap();
-    assert_eq!(balance_query.balance, Uint128::from(97000_u32));
+    assert_eq!(balance_query.balance, Uint128::from(amount - expected));
 
     // swap_inst has retained its fee
     let balance_query: BalanceResponse = query(
@@ -272,11 +291,11 @@ fn test_fees_cw20() {
             address: swap_inst.clone().to_string()
         }
     ).unwrap();
-    assert_eq!(balance_query.balance, Uint128::from(3000_u32));
+    assert_eq!(balance_query.balance, Uint128::from(expected));
 
     // swap_admin can withdraw cw20 fees
     let withdraw_msg = WithdrawMsg {
-        amount: Uint128::from(3000_u32),
+        amount: Uint128::from(expected),
         denom: String::from(DENOM),
         payment_token: Some(cw20_inst.clone()),
     };
@@ -297,5 +316,5 @@ fn test_fees_cw20() {
             address: swap_admin.to_string()
         }
     ).unwrap();
-    assert_eq!(balance_query.balance, Uint128::from(3000_u32));
+    assert_eq!(balance_query.balance, Uint128::from(expected));
 }
