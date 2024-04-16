@@ -38,19 +38,12 @@
       "type": "object",
       "required": [
         "admin",
-        "cw721",
         "denom",
         "fees"
       ],
       "properties": {
         "admin": {
           "$ref": "#/definitions/Addr"
-        },
-        "cw721": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Addr"
-          }
         },
         "denom": {
           "type": "string"
