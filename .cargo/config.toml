@@ -1,2 +1,3 @@
 [alias]
 schema = "run-script schema"
+optimize = "run-script optimize"
