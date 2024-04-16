@@ -241,7 +241,7 @@ pub fn execute_add_cw721(
     info: MessageInfo,
     msg: UpdateNftMsg,
 ) -> Result<Response, ContractError> {
-    let mut config = CONFIG.load(deps.storage)?;
+    let config = CONFIG.load(deps.storage)?;
 
     if config.admin != info.sender {
         return Err(ContractError::Unauthorized {});
@@ -263,7 +263,7 @@ pub fn execute_remove_cw721(
     info: MessageInfo,
     msg: UpdateNftMsg,
 ) -> Result<Response, ContractError> {
-    let mut config = CONFIG.load(deps.storage)?;
+    let config = CONFIG.load(deps.storage)?;
 
     if config.admin != info.sender {
         return Err(ContractError::Unauthorized {});
