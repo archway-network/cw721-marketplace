@@ -13,7 +13,7 @@ use crate::query::{
     query_swaps_by_denom, query_swaps_by_payment_type, query_swaps_by_price, query_swaps_of_token,
 };
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
-use crate::state::{Config, CONFIG};
+use crate::state::{Config, CONFIG, CW721};
 use crate::error::ContractError;
 
 use cw2::{get_contract_version, set_contract_version};
@@ -38,9 +38,13 @@ pub fn instantiate(
     let config = Config {
         admin: msg.admin,
         denom: msg.denom.clone(),
-        cw721: msg.cw721,
         fees: fee_percentage,
     };
+
+    for contract in msg.cw721 {
+        CW721.save(deps.storage, contract.as_str(), &())?;
+    }
+
     CONFIG.save(deps.storage, &config)?;
 
     Ok(Response::new()
