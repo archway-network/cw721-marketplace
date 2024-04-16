@@ -7,7 +7,7 @@ use cw20::Cw20ExecuteMsg;
 use utils::FeeSplit;
 use utils::prelude::{CW721Swap, SwapType};
 
-use crate::state::{Config, CONFIG, SWAPS};
+use crate::state::{Config, CONFIG, CW721, cw721_allowed, SWAPS};
 use crate::utils::{
     check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };
@@ -28,7 +28,7 @@ pub fn execute_create(
         return Err(ContractError::Expired {});
     }
     // If no cw721 permission, revert
-    if !config.cw721.contains(&msg.cw721) {
+    if !cw721_allowed(deps.storage, &msg.cw721) {
         return Err(ContractError::Unauthorized {});
     }
 
@@ -123,7 +123,7 @@ pub fn execute_finish(
         return Err(ContractError::Expired {});
     }
     // If no cw721 permission, revert
-    if !config.cw721.contains(&swap.nft_contract) {
+    if !cw721_allowed(deps.storage, &swap.nft_contract) {
         return Err(ContractError::Unauthorized {});
     }
 
@@ -246,13 +246,11 @@ pub fn execute_add_cw721(
     if config.admin != info.sender {
         return Err(ContractError::Unauthorized {});
     }
-    if config.cw721.contains(&msg.cw721) {
+    if cw721_allowed(deps.storage, &msg.cw721) {
         return Err(ContractError::InvalidInput {});
     }
 
-    config.cw721.push(msg.cw721.clone());
-
-    CONFIG.save(deps.storage, &config)?;
+    CW721.save(deps.storage, msg.cw721.as_str(), &())?;
 
     Ok(Response::new()
         .add_attribute("action", "add_cw721")
@@ -270,13 +268,11 @@ pub fn execute_remove_cw721(
     if config.admin != info.sender {
         return Err(ContractError::Unauthorized {});
     }
-    if !config.cw721.contains(&msg.cw721) {
+    if !cw721_allowed(deps.storage, &msg.cw721) {
         return Err(ContractError::InvalidInput {});
     }
 
-    config.cw721.retain(|contract| *contract != msg.cw721.clone());
-
-    CONFIG.save(deps.storage, &config)?;
+    CW721.remove(deps.storage, msg.cw721.as_str());
 
     Ok(Response::new()
         .add_attribute("action", "remove_cw721")

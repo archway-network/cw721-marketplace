@@ -15,7 +15,6 @@ pub use utils::prelude::SwapType;
 pub struct Config {
     pub admin: Addr,
     pub denom: String,
-    pub cw721: Vec<Addr>,
     pub fees: u64,
 }
 
@@ -29,5 +28,12 @@ pub fn all_swap_ids<'a>(
         .take(limit)
         .collect()
 }
+
+/// Wrapper for checking cw721 validity
+pub fn cw721_allowed(storage: &dyn Storage, addr: &Addr) -> bool {
+    CW721.has(storage, addr.as_str())
+}
+
+pub const CW721: Map<&str, ()> = Map::new("allowed_cw721");
 pub const SWAPS: Map<&str, CW721Swap> = Map::new("cw721_swap");
 pub const CONFIG: Item<Config> = Item::new("config");
