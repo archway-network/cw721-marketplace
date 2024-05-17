@@ -1,11 +1,13 @@
 [package]
 name = "cw721-marketplace"
 version = "0.1.5"
+description = "An open marketplace for cw721 NFTs that accepts swapping any NFT available on the host network"
 authors = [
   "johhonn <jjj.may377@gmail.com>",
   "Drew Taylor <drew.taylor@philabs.xyz>",
   "Guy Garcia <guy.garcia@philabs.xyz>",
 ]
+license = "Apache-2.0"
 edition = "2021"
 
 exclude = [
@@ -45,7 +47,7 @@ cw721.workspace = true
 schemars.workspace = true
 serde.workspace = true
 thiserror.workspace = true
-cw721-marketplace-utils = { path = "../../cw721-marketplace-utils" }
+cw721-marketplace-utils.workspace = true
 
 [dev-dependencies]
 cosmwasm-schema.workspace = true

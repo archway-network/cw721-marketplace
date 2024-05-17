@@ -29,6 +29,7 @@ schemars = "0.8"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = "1.0"
 rstest = "0.18.2"
+cw721-marketplace-utils = "0.1.5"
 
 [workspace.metadata.scripts]
 schema = """

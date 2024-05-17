@@ -7,6 +7,7 @@ authors = [
   "Guy Garcia <guy.garcia@philabs.xyz>",
 ]
 edition = "2021"
+license = "Apache-2.0"
 
 exclude = [
   # Those files are rust-optimizer artifacts. You might want to commit them for convenience but they should not be part of the source code publication.
@@ -45,7 +46,7 @@ cw721.workspace = true
 schemars.workspace = true
 serde.workspace = true
 thiserror.workspace = true
-cw721-marketplace-utils = { path = "../../cw721-marketplace-utils" }
+cw721-marketplace-utils.workspace = true
 
 [dev-dependencies]
 cosmwasm-schema.workspace = true

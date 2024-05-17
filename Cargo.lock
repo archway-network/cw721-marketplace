@@ -373,7 +373,7 @@ dependencies = [
  "cw20-base",
  "cw721",
  "cw721-base",
- "cw721-marketplace-utils",
+ "cw721-marketplace-utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rstest",
  "schemars",
  "serde",
@@ -394,7 +394,7 @@ dependencies = [
  "cw20-base",
  "cw721",
  "cw721-base",
- "cw721-marketplace-utils",
+ "cw721-marketplace-utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rstest",
  "schemars",
  "serde",
@@ -415,7 +415,7 @@ dependencies = [
  "cw20-base",
  "cw721",
  "cw721-base",
- "cw721-marketplace-utils",
+ "cw721-marketplace-utils 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rstest",
  "schemars",
  "serde",
@@ -425,6 +425,19 @@ dependencies = [
 [[package]]
 name = "cw721-marketplace-utils"
 version = "0.1.5"
+dependencies = [
+ "cosmwasm-std",
+ "cw20",
+ "schemars",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "cw721-marketplace-utils"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41de107a7ee782384d854e0e754672bc3fc7131d3aeb42b1b5afd2a2ec774b2f"
 dependencies = [
  "cosmwasm-std",
  "cw20",
