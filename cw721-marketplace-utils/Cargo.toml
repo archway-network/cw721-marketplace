@@ -1,6 +1,11 @@
 [package]
 name = "cw721-marketplace-utils"
 version = "0.1.5"
+authors = [
+  "Drew Taylor <drew.taylor@philabs.xyz>",
+  "Guy Garcia <guy.garcia@philabs.xyz>",
+]
+
 edition = "2021"
 
 [dependencies]
