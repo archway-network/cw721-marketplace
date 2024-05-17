@@ -1,10 +1,14 @@
 use cosmwasm_std::{Addr, Deps, Order, StdResult, Uint128};
 use cw_storage_plus::Bound;
-use utils::prelude::{CW721Swap, PageResult, SwapType};
 
-use utils::prelude::{DetailsResponse, ListResponse};
+use cw721_marketplace_utils::prelude::{
+    CW721Swap, DetailsResponse, ListResponse, PageResult, SwapType
+};
+use crate::utils::{
+    calculate_page_params, PageParams
+};
+
 use crate::state::{all_swap_ids, Config, CONFIG, SWAPS};
-use crate::utils::{calculate_page_params, PageParams};
 
 // Default and Max page sizes for paginated queries
 const MAX_LIMIT: u32 = 100;

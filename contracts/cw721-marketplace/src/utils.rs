@@ -9,8 +9,8 @@ use cw20::Cw20ExecuteMsg;
 use cw721_base::{QueryMsg as Cw721QueryMsg};
 use cw721::OwnerOfResponse;
 use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension};
-use utils::{fee_percentage, FeeSplit};
-use utils::prelude::CW721Swap;
+
+use cw721_marketplace_utils::{fee_percentage, FeeSplit, prelude::CW721Swap};
 
 use crate::state::{CONFIG};
 use crate::error::ContractError;

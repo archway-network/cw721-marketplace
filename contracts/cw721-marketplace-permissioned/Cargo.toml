@@ -45,7 +45,7 @@ cw721.workspace = true
 schemars.workspace = true
 serde.workspace = true
 thiserror.workspace = true
-utils = { path = "../../utils" }
+cw721-marketplace-utils = { path = "../../cw721-marketplace-utils" }
 
 [dev-dependencies]
 cosmwasm-schema.workspace = true

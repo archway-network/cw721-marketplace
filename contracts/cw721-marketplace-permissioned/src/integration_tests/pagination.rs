@@ -8,7 +8,7 @@ use cw20::Expiration;
 use cw721_base::{
     msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg,
 };
-use utils::prelude::{ListResponse, PageResult};
+use cw721_marketplace_utils::prelude::{ListResponse, PageResult};
 
 use crate::integration_tests::util::{
     create_cw721, create_swap, has_unique_elements, mock_app, query,

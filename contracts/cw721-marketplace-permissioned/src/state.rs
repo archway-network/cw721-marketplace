@@ -8,8 +8,8 @@ use cw_storage_plus::{
     Bound, Item, Map,
 };
 
-use utils::prelude::CW721Swap;
-pub use utils::prelude::SwapType;
+use cw721_marketplace_utils::prelude::CW721Swap;
+pub use cw721_marketplace_utils::prelude::SwapType;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct Config {

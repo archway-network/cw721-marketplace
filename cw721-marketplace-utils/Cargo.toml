@@ -1,6 +1,6 @@
 [package]
-name = "utils"
-version = "0.1.0"
+name = "cw721-marketplace-utils"
+version = "0.1.5"
 edition = "2021"
 
 [dependencies]

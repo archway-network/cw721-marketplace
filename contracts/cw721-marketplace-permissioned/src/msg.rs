@@ -2,7 +2,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use cosmwasm_std::{Addr, Uint128};
 use cw20::Expiration;
-use utils::prelude::SwapType;
+use cw721_marketplace_utils::prelude::SwapType;
 use crate::state::{Config};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

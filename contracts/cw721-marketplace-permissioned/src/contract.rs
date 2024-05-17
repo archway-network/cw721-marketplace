@@ -4,6 +4,8 @@ use cosmwasm_std::{
     SubMsgResult, to_json_binary,
 };
 
+use cw721_marketplace_utils::prelude::SwapType;
+
 use crate::execute::{
     execute_create, execute_cancel, execute_finish, execute_update, 
     execute_add_cw721, execute_remove_cw721, execute_update_config, execute_withdraw_fees
@@ -17,7 +19,6 @@ use crate::state::{Config, CONFIG, CW721};
 use crate::error::ContractError;
 
 use cw2::{get_contract_version, set_contract_version};
-use utils::prelude::SwapType;
 
 // version info for migration info
 const CONTRACT_NAME: &str = "crates.io:archid-marketplace";
