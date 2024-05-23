@@ -1,6 +1,6 @@
 [workspace]
 
-members = ["contracts/cw721-marketplace", "contracts/cw721-marketplace-single-collection", "contracts/cw721-marketplace-permissioned", "utils"]
+members = ["contracts/cw721-marketplace", "contracts/cw721-marketplace-single-collection", "contracts/cw721-marketplace-permissioned", "cw721-marketplace-utils"]
 resolver = "2"
 
 [profile.release]
@@ -29,6 +29,7 @@ schemars = "0.8"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = "1.0"
 rstest = "0.18.2"
+cw721-marketplace-utils = "0.1.5"
 
 [workspace.metadata.scripts]
 schema = """

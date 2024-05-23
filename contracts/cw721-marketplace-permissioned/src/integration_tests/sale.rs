@@ -11,7 +11,7 @@ use cw721_base::{
     msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg, msg::QueryMsg as Cw721QueryMsg,
 };
 use cw721::OwnerOfResponse;
-use utils::prelude::PageResult;
+use cw721_marketplace_utils::prelude::PageResult;
 
 use crate::integration_tests::util::{
     bank_query, create_cw20, create_cw721, create_swap, mint_native, mock_app, query,

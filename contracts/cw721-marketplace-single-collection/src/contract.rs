@@ -4,6 +4,8 @@ use cosmwasm_std::{
     SubMsgResult, to_json_binary,
 };
 
+use cw721_marketplace_utils::prelude::SwapType;
+
 use crate::execute::{
     execute_create, execute_cancel, execute_finish, execute_update, execute_update_config,
     execute_withdraw_fees,
@@ -15,7 +17,6 @@ use crate::query::{
 use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 use crate::state::{Config, CONFIG};
 use crate::error::ContractError;
-use utils::prelude::SwapType;
 
 use cw2::{get_contract_version, set_contract_version};
 

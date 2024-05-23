@@ -4,13 +4,15 @@ use cosmwasm_std::{
 };
 
 use cw20::Cw20ExecuteMsg;
-use utils::FeeSplit;
-use utils::prelude::{CW721Swap, SwapType};
 
-use crate::state::{Config, CONFIG, SWAPS};
+use cw721_marketplace_utils::{
+    FeeSplit, prelude::CW721Swap, prelude::SwapType
+};
 use crate::utils::{
     check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };
+
+use crate::state::{Config, CONFIG, SWAPS};
 use crate::msg::{
     CancelMsg, FinishSwapMsg, SwapMsg, UpdateMsg, WithdrawMsg
 };

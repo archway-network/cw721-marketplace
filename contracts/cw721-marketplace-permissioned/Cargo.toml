@@ -1,12 +1,14 @@
 [package]
 name = "cw721-marketplace-permissioned"
 version = "0.1.5"
+description = "A permissioned marketplace for swapping any cw721 NFTs available on the host network from any collection contract added by the contract admin to the permissioned list of NFT contracts"
 authors = [
   "johhonn <jjj.may377@gmail.com>",
   "Drew Taylor <drew.taylor@philabs.xyz>",
   "Guy Garcia <guy.garcia@philabs.xyz>",
 ]
 edition = "2021"
+license = "Apache-2.0"
 
 exclude = [
   # Those files are rust-optimizer artifacts. You might want to commit them for convenience but they should not be part of the source code publication.
@@ -45,7 +47,7 @@ cw721.workspace = true
 schemars.workspace = true
 serde.workspace = true
 thiserror.workspace = true
-utils = { path = "../../utils" }
+cw721-marketplace-utils.workspace = true
 
 [dev-dependencies]
 cosmwasm-schema.workspace = true

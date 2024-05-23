@@ -12,7 +12,7 @@ use cw721_base::{
 };
 use cw721::OwnerOfResponse;
 use rstest::rstest;
-use utils::prelude::PageResult;
+use cw721_marketplace_utils::prelude::PageResult;
 
 use crate::integration_tests::util::{
     bank_query, create_cw20, create_cw721, create_swap_with_fees, mint_native, mock_app, query,

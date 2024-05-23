@@ -1,0 +1,17 @@
+[package]
+name = "cw721-marketplace-utils"
+version = "0.1.5"
+description = "Utility types and helpers for cw721-marketplace, cw721-marketplace-permissioned and cw721-marketplace-single-collection"
+authors = [
+  "Drew Taylor <drew.taylor@philabs.xyz>",
+  "Guy Garcia <guy.garcia@philabs.xyz>",
+]
+license = "Apache-2.0"
+edition = "2021"
+
+[dependencies]
+cosmwasm-std.workspace = true
+schemars.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+cw20.workspace = true
