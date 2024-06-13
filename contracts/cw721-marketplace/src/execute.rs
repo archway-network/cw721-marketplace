@@ -1,9 +1,7 @@
-use cosmwasm_std::{
-    BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, Response,
-    to_json_binary, WasmMsg,
-};
+use cosmwasm_std::{BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, QueryRequest, Response, to_json_binary, WasmMsg, WasmQuery};
 
 use cw20::Cw20ExecuteMsg;
+use cw721::OwnerOfResponse;
 
 use cw721_marketplace_utils::{
     FeeSplit, prelude::CW721Swap, prelude::SwapType
@@ -149,14 +147,29 @@ pub fn execute_finish(
 
     // Do swap transfer
     let transfer_results = match swap.swap_type {
-        SwapType::Offer => handle_swap_transfers(
-            env,
-            &info.sender, 
-            &swap.creator, 
-            swap.clone(), 
-            config.denom.clone(),
-            split,
-        )?,
+        SwapType::Offer => {
+            let owner_of: OwnerOfResponse =
+                deps.querier.query(&QueryRequest::Wasm(WasmQuery::Smart {
+                    contract_addr: swap.nft_contract.to_string(),
+                    msg: to_json_binary(&cw721::Cw721QueryMsg::OwnerOf {
+                        token_id: swap.token_id.clone(),
+                        include_expired: None,
+                    })?,
+                }))?;
+
+            if owner_of.owner != info.sender {
+                return Err(ContractError::Unauthorized {});
+            }
+
+            handle_swap_transfers(
+                env,
+                &info.sender,
+                &swap.creator,
+                swap.clone(),
+                config.denom.clone(),
+                split,
+            )?
+        },
         SwapType::Sale => handle_swap_transfers(
             env,
             &swap.creator, 
