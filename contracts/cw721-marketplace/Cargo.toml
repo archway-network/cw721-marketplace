@@ -1,6 +1,6 @@
 [package]
 name = "cw721-marketplace"
-version = "0.1.5"
+version = "0.1.6"
 description = "An open marketplace for cw721 NFTs that accepts swapping any NFT available on the host network"
 authors = [
   "johhonn <jjj.may377@gmail.com>",

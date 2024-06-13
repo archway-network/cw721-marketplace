@@ -1,6 +1,6 @@
 [package]
 name = "cw721-marketplace-permissioned"
-version = "0.1.5"
+version = "0.1.6"
 description = "A permissioned marketplace for swapping any cw721 NFTs available on the host network from any collection contract added by the contract admin to the permissioned list of NFT contracts"
 authors = [
   "johhonn <jjj.may377@gmail.com>",
