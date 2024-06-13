@@ -1,12 +1,8 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use cosmwasm_std::{
-    Addr, Order, Storage, StdResult,
-};
-use cw_storage_plus::{
-    Bound, Item, Map,
-};
+use cosmwasm_std::{Addr, Order, StdResult, Storage};
+use cw_storage_plus::{Bound, Item, Map};
 
 use cw721_marketplace_utils::prelude::CW721Swap;
 pub use cw721_marketplace_utils::prelude::SwapType;
@@ -29,7 +25,6 @@ pub fn all_swap_ids<'a>(
         .take(limit)
         .collect()
 }
-
 
 pub const SWAPS: Map<&str, CW721Swap> = Map::new("cw721_swap");
 pub const CONFIG: Item<Config> = Item::new("config");

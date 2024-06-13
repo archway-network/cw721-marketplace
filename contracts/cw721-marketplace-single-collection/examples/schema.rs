@@ -1,9 +1,9 @@
 use std::env::current_dir;
 use std::fs::create_dir_all;
 
+use cosmwasm_schema::{export_schema, remove_schemas, schema_for};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use cosmwasm_schema::{export_schema, remove_schemas, schema_for};
 
 use cw721_marketplace_single_collection::msg::{ExecuteMsg, InstantiateMsg, QueryMsg};
 

@@ -1,19 +1,19 @@
+use cosmwasm_std::{
+    from_json, to_json_binary, Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, DepsMut,
+    Env, QueryRequest, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
+};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use cosmwasm_std::{
-    Addr, BalanceResponse, BankMsg, BankQuery, Coin, CosmosMsg, DepsMut, Env, from_json,
-    QueryRequest, to_json_binary, StdError, StdResult, Uint128, WasmMsg, WasmQuery,
-};
 
 use cw20::Cw20ExecuteMsg;
-use cw721_base::{QueryMsg as Cw721QueryMsg};
 use cw721::OwnerOfResponse;
+use cw721_base::QueryMsg as Cw721QueryMsg;
 use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension};
 
-use cw721_marketplace_utils::{fee_percentage, FeeSplit, prelude::CW721Swap};
+use cw721_marketplace_utils::{fee_percentage, prelude::CW721Swap, FeeSplit};
 
-use crate::state::{CONFIG};
 use crate::error::ContractError;
+use crate::state::CONFIG;
 
 // Default and Max page sizes for paginated queries
 const MAX_LIMIT: u32 = 100;
@@ -61,21 +61,25 @@ pub fn calculate_page_params(
     } else if limit > MAX_LIMIT {
         limit = MAX_LIMIT;
     }
-    let modulo = if total_results > 0 { total_results % limit } else { 0 };
-    let last_page = if total_results == 0 {
-        0 
-    } else if modulo > 0 { 
-        total_results / limit 
+    let modulo = if total_results > 0 {
+        total_results % limit
     } else {
-        total_results / limit - 1 
+        0
     };
-    let page_size: u32 = if page == last_page { 
+    let last_page = if total_results == 0 {
+        0
+    } else if modulo > 0 {
+        total_results / limit
+    } else {
+        total_results / limit - 1
+    };
+    let page_size: u32 = if page == last_page {
         match modulo {
             0 => limit,
             _ => modulo,
         }
-    } else { 
-        limit 
+    } else {
+        limit
     };
 
     // Results
@@ -83,7 +87,7 @@ pub fn calculate_page_params(
     let end = (start as u32 + page_size) as usize;
     let res = PageParams {
         start,
-        end, 
+        end,
         page,
         total: total_results as u128,
     };
@@ -151,11 +155,15 @@ pub fn check_contract_balance_ok(
     let required_amount = required.amount.u128();
 
     // Balance query
-    let req: QueryRequest<BankQuery> = QueryRequest::Bank(BankQuery::Balance { 
+    let req: QueryRequest<BankQuery> = QueryRequest::Bank(BankQuery::Balance {
         address: swap_instance.to_string(),
         denom: required_denom,
     });
-    let res = deps.querier.raw_query(&to_json_binary(&req).unwrap()).unwrap().unwrap();
+    let res = deps
+        .querier
+        .raw_query(&to_json_binary(&req).unwrap())
+        .unwrap()
+        .unwrap();
     let query: BalanceResponse = from_json(res).unwrap();
     let balance: Coin = query.amount;
     if balance.amount.u128() < required_amount {
@@ -205,21 +213,24 @@ pub fn handle_swap_transfers(
         aarch_callback
     };
 
-    let market_callback: Option<CosmosMsg> = if details.payment_token.is_some() && fee_split.marketplace.u128() > 0 { 
-        let token_transfer_msg = Cw20ExecuteMsg::TransferFrom {
-            owner: nft_receiver.to_string(),
-            recipient: env.contract.address.to_string(),
-            amount: fee_split.marketplace,
-        };
+    let market_callback: Option<CosmosMsg> =
+        if details.payment_token.is_some() && fee_split.marketplace.u128() > 0 {
+            let token_transfer_msg = Cw20ExecuteMsg::TransferFrom {
+                owner: nft_receiver.to_string(),
+                recipient: env.contract.address.to_string(),
+                amount: fee_split.marketplace,
+            };
 
-        let cw20_callback: CosmosMsg = WasmMsg::Execute {
-            contract_addr: details.payment_token.clone().unwrap().into(),
-            msg: to_json_binary(&token_transfer_msg)?,
-            funds: vec![],
-        }
-        .into();
-        Some(cw20_callback)
-    } else { None };
+            let cw20_callback: CosmosMsg = WasmMsg::Execute {
+                contract_addr: details.payment_token.clone().unwrap().into(),
+                msg: to_json_binary(&token_transfer_msg)?,
+                funds: vec![],
+            }
+            .into();
+            Some(cw20_callback)
+        } else {
+            None
+        };
 
     let nft_transfer_msg = Cw721ExecuteMsg::<Extension>::TransferNft {
         recipient: nft_receiver.to_string(),
@@ -234,22 +245,21 @@ pub fn handle_swap_transfers(
     .into();
 
     let mut msgs = vec![cw721_callback, payment_callback];
-    if let Some(fees) = market_callback { msgs.push(fees); }
+    if let Some(fees) = market_callback {
+        msgs.push(fees);
+    }
 
     Ok(msgs)
 }
 
-pub fn fee_split(
-    deps: &DepsMut,
-    swap_price: Uint128,
-) -> Result<FeeSplit, ContractError> {
+pub fn fee_split(deps: &DepsMut, swap_price: Uint128) -> Result<FeeSplit, ContractError> {
     let config = CONFIG.load(deps.storage)?;
     let marketplace: Uint128 = fee_percentage(swap_price, config.fees);
     if marketplace.u128() >= swap_price.into() {
         return Err(ContractError::InvalidInput {});
     }
     let seller: Uint128 = Uint128::from(swap_price.u128() - marketplace.u128());
-    let result = FeeSplit { 
+    let result = FeeSplit {
         marketplace,
         seller,
     };

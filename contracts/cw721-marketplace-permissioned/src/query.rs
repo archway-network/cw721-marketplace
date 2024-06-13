@@ -1,11 +1,9 @@
 use cosmwasm_std::{Addr, Deps, Order, StdResult, Uint128};
 use cw_storage_plus::Bound;
 
+use crate::utils::{calculate_page_params, PageParams};
 use cw721_marketplace_utils::prelude::{
-    CW721Swap, DetailsResponse, ListResponse, PageResult, SwapType
-};
-use crate::utils::{
-    calculate_page_params, PageParams
+    CW721Swap, DetailsResponse, ListResponse, PageResult, SwapType,
 };
 
 use crate::state::{all_swap_ids, Config, CONFIG, SWAPS};
@@ -42,7 +40,6 @@ pub fn query_list(
 }
 
 pub fn query_swap_total(deps: Deps, side: Option<SwapType>) -> StdResult<u128> {
-
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
         .range(deps.storage, None, None, Order::Ascending)
         .collect();
@@ -52,23 +49,19 @@ pub fn query_swap_total(deps: Deps, side: Option<SwapType>) -> StdResult<u128> {
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| { item.swap_type == swap_type })
+            .filter(|item| item.swap_type == swap_type)
             .collect()
     } else {
-        swaps
-            .unwrap()
-            .into_iter()
-            .map(|t| t.1)
-            .collect()
+        swaps.unwrap().into_iter().map(|t| t.1).collect()
     };
-    
+
     Ok(results.len() as u128)
 }
 
 pub fn query_swaps(
     deps: Deps,
-    side: SwapType, 
-    page: Option<u32>, 
+    side: SwapType,
+    page: Option<u32>,
     limit: Option<u32>,
 ) -> StdResult<PageResult> {
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
@@ -79,7 +72,7 @@ pub fn query_swaps(
         .unwrap()
         .into_iter()
         .map(|t| t.1)
-        .filter(|item| { item.swap_type == side })
+        .filter(|item| item.swap_type == side)
         .collect();
 
     let paging: PageParams = calculate_page_params(page, limit, results.len() as u32)?;
@@ -96,8 +89,8 @@ pub fn query_swaps_of_token(
     deps: Deps,
     token_id: String,
     cw721: Addr,
-    side: Option<SwapType>, 
-    page: Option<u32>, 
+    side: Option<SwapType>,
+    page: Option<u32>,
     limit: Option<u32>,
 ) -> StdResult<PageResult> {
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
@@ -111,8 +104,8 @@ pub fn query_swaps_of_token(
             .map(|t| t.1)
             .filter(|item| {
                 item.token_id == token_id
-                && item.nft_contract == cw721
-                && item.swap_type == swap_type
+                    && item.nft_contract == cw721
+                    && item.swap_type == swap_type
             })
             .collect()
     } else {
@@ -120,10 +113,7 @@ pub fn query_swaps_of_token(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| { 
-                item.token_id == token_id 
-                && item.nft_contract == cw721
-            })
+            .filter(|item| item.token_id == token_id && item.nft_contract == cw721)
             .collect()
     };
 
@@ -138,7 +128,7 @@ pub fn query_swaps_of_token(
 }
 
 pub fn query_swaps_by_creator(
-    deps: Deps, 
+    deps: Deps,
     address: Addr,
     swap_type: Option<SwapType>,
     cw721: Option<Addr>,
@@ -156,9 +146,7 @@ pub fn query_swaps_by_creator(
             .into_iter()
             .map(|t| t.1)
             .filter(|item| {
-                item.creator == address
-                && item.swap_type == side
-                && item.nft_contract == contract
+                item.creator == address && item.swap_type == side && item.nft_contract == contract
             })
             .collect()
     } else {
@@ -166,10 +154,7 @@ pub fn query_swaps_by_creator(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| {
-                item.creator == address
-                && item.swap_type == side
-            })
+            .filter(|item| item.creator == address && item.swap_type == side)
             .collect()
     };
 
@@ -184,9 +169,9 @@ pub fn query_swaps_by_creator(
 }
 
 pub fn query_swaps_by_price(
-    deps: Deps, 
-    min: Option<Uint128>, 
-    max: Option<Uint128>, 
+    deps: Deps,
+    min: Option<Uint128>,
+    max: Option<Uint128>,
     swap_type: Option<SwapType>,
     cw721: Option<Addr>,
     page: Option<u32>,
@@ -206,8 +191,8 @@ pub fn query_swaps_by_price(
             .map(|t| t.1)
             .filter(|item| {
                 item.price.u128() >= min.u128()
-                && item.price.u128() <= max_value.u128()
-                && item.swap_type == side
+                    && item.price.u128() <= max_value.u128()
+                    && item.swap_type == side
             })
             .collect()
     } else {
@@ -215,10 +200,7 @@ pub fn query_swaps_by_price(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| {
-                item.price.u128() >= min.u128()
-                && item.swap_type == side
-            })
+            .filter(|item| item.price.u128() >= min.u128() && item.swap_type == side)
             .collect()
     };
 
@@ -226,9 +208,7 @@ pub fn query_swaps_by_price(
     results = if let Some(contract) = cw721 {
         results
             .into_iter()
-            .filter(|item| {
-                item.nft_contract == contract  
-            })
+            .filter(|item| item.nft_contract == contract)
             .collect()
     } else {
         results
@@ -245,8 +225,8 @@ pub fn query_swaps_by_price(
 }
 
 pub fn query_swaps_by_denom(
-    deps: Deps, 
-    payment_token: Option<Addr>, 
+    deps: Deps,
+    payment_token: Option<Addr>,
     swap_type: Option<SwapType>,
     cw721: Option<Addr>,
     page: Option<u32>,
@@ -264,8 +244,7 @@ pub fn query_swaps_by_denom(
             .into_iter()
             .map(|t| t.1)
             .filter(|item| {
-                item.payment_token.clone().unwrap() == token_addr
-                && item.swap_type == side
+                item.payment_token.clone().unwrap() == token_addr && item.swap_type == side
             })
             .collect()
     // Native ARCH denom
@@ -274,10 +253,7 @@ pub fn query_swaps_by_denom(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| {
-                item.payment_token.is_none()
-                && item.swap_type == side
-            })
+            .filter(|item| item.payment_token.is_none() && item.swap_type == side)
             .collect()
     };
 
@@ -285,9 +261,7 @@ pub fn query_swaps_by_denom(
     results = if let Some(contract) = cw721 {
         results
             .into_iter()
-            .filter(|item| {
-                item.nft_contract == contract  
-            })
+            .filter(|item| item.nft_contract == contract)
             .collect()
     } else {
         results
@@ -304,7 +278,7 @@ pub fn query_swaps_by_denom(
 }
 
 pub fn query_swaps_by_payment_type(
-    deps: Deps, 
+    deps: Deps,
     cw20: bool,
     swap_type: Option<SwapType>,
     cw721: Option<Addr>,
@@ -322,10 +296,7 @@ pub fn query_swaps_by_payment_type(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| {
-                item.payment_token.is_some()
-                && item.swap_type == side
-            })
+            .filter(|item| item.payment_token.is_some() && item.swap_type == side)
             .collect()
     // ARCH swap
     } else {
@@ -333,10 +304,7 @@ pub fn query_swaps_by_payment_type(
             .unwrap()
             .into_iter()
             .map(|t| t.1)
-            .filter(|item| {
-                item.payment_token.is_none()
-                && item.swap_type == side
-            })
+            .filter(|item| item.payment_token.is_none() && item.swap_type == side)
             .collect()
     };
 
@@ -344,9 +312,7 @@ pub fn query_swaps_by_payment_type(
     results = if let Some(contract) = cw721 {
         results
             .into_iter()
-            .filter(|item| {
-                item.nft_contract == contract  
-            })
+            .filter(|item| item.nft_contract == contract)
             .collect()
     } else {
         results

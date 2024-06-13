@@ -1,23 +1,13 @@
 #![cfg(test)]
-use cosmwasm_std::{
-    Addr, Uint128,
-};
+use cosmwasm_std::{Addr, Uint128};
 use cw_multi_test::Executor;
 
-use cw20::{
-    Cw20ExecuteMsg, Expiration,
-};
-use cw721_base::{
-    msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg,
-};
+use cw20::{Cw20ExecuteMsg, Expiration};
+use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg};
 use cw721_marketplace_utils::prelude::PageResult;
 
-use crate::integration_tests::util::{
-    create_cw20, create_cw721, create_swap, mock_app, query,
-};
-use crate::msg::{
-    CancelMsg, ExecuteMsg, QueryMsg, SwapMsg,
-};
+use crate::integration_tests::util::{create_cw20, create_cw721, create_swap, mock_app, query};
+use crate::msg::{CancelMsg, ExecuteMsg, QueryMsg, SwapMsg};
 use crate::state::SwapType;
 
 // Seller must be able to cancel sale
@@ -25,7 +15,7 @@ use crate::state::SwapType;
 #[test]
 fn test_cancel_sales() {
     let mut app = mock_app();
-    
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -33,12 +23,12 @@ fn test_cancel_sales() {
 
     // cw721_owner creates the cw721
     let nft = create_cw721(&mut app, &cw721_owner);
-    
-    // swap_admin creates the swap contract 
+
+    // swap_admin creates the swap contract
     let swap = create_swap(&mut app, &swap_admin, nft.clone());
     let swap_inst = swap.clone();
 
-    // cw721_owner mints a cw721 
+    // cw721_owner mints a cw721
     let token_id = "petrify".to_string();
     let token_uri = "https://www.merriam-webster.com/dictionary/petrify".to_string();
     let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
@@ -57,7 +47,7 @@ fn test_cancel_sales() {
         id: swap_id.clone(),
         cw721: nft.clone(),
         payment_token: None,
-        token_id: token_id.clone(),    
+        token_id: token_id.clone(),
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
         price: Uint128::from(1000000000000000000_u128), // 1 ARCH as aarch
         swap_type: SwapType::Sale,
@@ -69,15 +59,19 @@ fn test_cancel_sales() {
         token_id: token_id.clone(),
         expires: None,
     };
-    app
-        .execute_contract(cw721_owner.clone(), nft.clone(), &nft_approve_msg, &[])
+    app.execute_contract(cw721_owner.clone(), nft.clone(), &nft_approve_msg, &[])
         .unwrap();
 
     // cw721 seller (cw721_owner) creates a swap
     let _res = app
-        .execute_contract(cw721_owner.clone(), swap_inst.clone(), &ExecuteMsg::Create(creation_msg), &[])
+        .execute_contract(
+            cw721_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Create(creation_msg),
+            &[],
+        )
         .unwrap();
-    
+
     // Query ListingsOfToken entry point (Sales)
     let listings_of_token: PageResult = query(
         &mut app,
@@ -88,17 +82,23 @@ fn test_cancel_sales() {
             swap_type: Some(SwapType::Sale),
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // 1 Result
     assert_eq!(listings_of_token.swaps.len(), 1);
 
     // cw721 seller (cw721_owner) cancels the swap
     let cancel_msg = CancelMsg { id: swap_id };
     let _res = app
-        .execute_contract(cw721_owner, swap_inst.clone(), &ExecuteMsg::Cancel(cancel_msg), &[])
+        .execute_contract(
+            cw721_owner,
+            swap_inst.clone(),
+            &ExecuteMsg::Cancel(cancel_msg),
+            &[],
+        )
         .unwrap();
-    
+
     // Query ListingsOfToken entry point (Sales)
     let listings_of_token: PageResult = query(
         &mut app,
@@ -109,8 +109,9 @@ fn test_cancel_sales() {
             swap_type: Some(SwapType::Sale),
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // 0 Results
     assert_eq!(listings_of_token.swaps.len(), 0);
 }
@@ -120,7 +121,7 @@ fn test_cancel_sales() {
 #[test]
 fn test_cancel_offers() {
     let mut app = mock_app();
-    
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -130,8 +131,8 @@ fn test_cancel_offers() {
 
     // cw721_owner creates the cw721
     let nft = create_cw721(&mut app, &cw721_owner);
-    
-    // swap_admin creates the swap contract 
+
+    // swap_admin creates the swap contract
     let swap = create_swap(&mut app, &swap_admin, nft.clone());
     let swap_inst = swap.clone();
 
@@ -145,7 +146,7 @@ fn test_cancel_offers() {
     );
     let cw20_inst = cw20.clone();
 
-    // cw721_owner mints a cw721 
+    // cw721_owner mints a cw721
     let token_id = "petrify".to_string();
     let token_uri = "https://www.merriam-webster.com/dictionary/petrify".to_string();
     let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
@@ -161,7 +162,7 @@ fn test_cancel_offers() {
     // Bidding buyer (cw20_owner) must approve swap contract to spend their cw20
     let cw20_approve_msg = Cw20ExecuteMsg::IncreaseAllowance {
         spender: swap.to_string(),
-        amount:  Uint128::from(1000000000000000000_u128),
+        amount: Uint128::from(1000000000000000000_u128),
         expires: None,
     };
     let _res = app
@@ -174,7 +175,7 @@ fn test_cancel_offers() {
         id: swap_id.clone(),
         cw721: nft.clone(),
         payment_token: Some(Addr::unchecked(cw20)),
-        token_id: token_id.clone(),    
+        token_id: token_id.clone(),
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
         price: Uint128::from(1000000000000000000_u128), // 1 wARCH
         swap_type: SwapType::Offer,
@@ -182,11 +183,12 @@ fn test_cancel_offers() {
 
     let _res = app
         .execute_contract(
-            cw20_owner.clone(), 
-            swap_inst.clone(), 
-            &ExecuteMsg::Create(creation_msg), 
-            &[]
-        ).unwrap();
+            cw20_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Create(creation_msg),
+            &[],
+        )
+        .unwrap();
 
     // Query ListingsOfToken entry point (Offer)
     let listings_of_token: PageResult = query(
@@ -198,15 +200,21 @@ fn test_cancel_offers() {
             swap_type: Some(SwapType::Offer),
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // 1 Result
     assert_eq!(listings_of_token.swaps.len(), 1);
 
     // Bidding buyer (cw20_owner) cancels the swap
     let cancel_msg = CancelMsg { id: swap_id };
     let _res = app
-        .execute_contract(cw20_owner.clone(), swap_inst.clone(), &ExecuteMsg::Cancel(cancel_msg), &[])
+        .execute_contract(
+            cw20_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Cancel(cancel_msg),
+            &[],
+        )
         .unwrap();
 
     // Query ListingsOfToken entry point (Offer)
@@ -219,8 +227,9 @@ fn test_cancel_offers() {
             swap_type: Some(SwapType::Offer),
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // 0 Results
     assert_eq!(listings_of_token.swaps.len(), 0);
 }

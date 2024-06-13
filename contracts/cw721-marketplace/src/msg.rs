@@ -1,9 +1,9 @@
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+use crate::state::Config;
 use cosmwasm_std::{Addr, Uint128};
 use cw20::Expiration;
 use cw721_marketplace_utils::prelude::SwapType;
-use crate::state::{Config};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {
@@ -22,7 +22,7 @@ pub enum ExecuteMsg {
     Update(UpdateMsg),
 
     // Admin entry points
-    UpdateConfig { config: Config, },
+    UpdateConfig { config: Config },
     Withdraw(WithdrawMsg),
 }
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -52,8 +52,8 @@ pub struct FinishSwapMsg {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct WithdrawMsg { 
-    pub amount: Uint128, 
+pub struct WithdrawMsg {
+    pub amount: Uint128,
     pub denom: String,
     pub payment_token: Option<Addr>,
 }
@@ -81,7 +81,7 @@ pub enum QueryMsg {
         page: Option<u32>,
         limit: Option<u32>,
     },
-    /// Get all listings for a token of type `Swap::Sale` and `Swap::Offer` 
+    /// Get all listings for a token of type `Swap::Sale` and `Swap::Offer`
     /// or both (`None`)
     ListingsOfToken {
         token_id: String,
@@ -92,7 +92,7 @@ pub enum QueryMsg {
     },
     /// Show all swaps created by a specific address
     /// Defaults to SwapType::Sale if no `swap_type`
-    SwapsOf { 
+    SwapsOf {
         address: Addr,
         swap_type: Option<SwapType>,
         cw721: Option<Addr>,
@@ -100,7 +100,7 @@ pub enum QueryMsg {
         limit: Option<u32>,
     },
     /// Show all swaps of a given price range
-    SwapsByPrice { 
+    SwapsByPrice {
         min: Option<Uint128>,
         max: Option<Uint128>,
         swap_type: Option<SwapType>,
@@ -128,7 +128,9 @@ pub enum QueryMsg {
 
     /// Returns the details of the named swap, error if not created.
     /// Return type: DetailsResponse.
-    Details { id: String },
+    Details {
+        id: String,
+    },
 
     /// Query Config (useful for determining parameters for ExecuteMsg::UpdateConfig)
     Config {},

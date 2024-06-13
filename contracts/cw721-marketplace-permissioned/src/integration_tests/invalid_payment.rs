@@ -1,24 +1,18 @@
 #![cfg(test)]
-use cosmwasm_std::{
-    Addr, Coin, Uint128,
-};
+use cosmwasm_std::{Addr, Coin, Uint128};
 use cw_multi_test::Executor;
 
-use cw20::{
-    BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, Expiration,
-};
-use cw721_base::{
-    msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg, msg::QueryMsg as Cw721QueryMsg,
-};
+use cw20::{BalanceResponse, Cw20ExecuteMsg, Cw20QueryMsg, Expiration};
 use cw721::OwnerOfResponse;
+use cw721_base::{
+    msg::ExecuteMsg as Cw721ExecuteMsg, msg::QueryMsg as Cw721QueryMsg, Extension, MintMsg,
+};
 
 use crate::integration_tests::util::{
     bank_query, create_cw20, create_cw721, create_swap, mint_native, mock_app, query,
 };
-use crate::msg::{
-    ExecuteMsg, FinishSwapMsg, SwapMsg,
-};
-use crate::state::{SwapType};
+use crate::msg::{ExecuteMsg, FinishSwapMsg, SwapMsg};
+use crate::state::SwapType;
 
 static DENOM: &str = "aarch";
 
@@ -26,7 +20,7 @@ static DENOM: &str = "aarch";
 #[test]
 fn test_invalid_payment_native() {
     let mut app = mock_app();
-    
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -36,11 +30,11 @@ fn test_invalid_payment_native() {
 
     // cw721_owner creates the cw721
     let nft = create_cw721(&mut app, &cw721_owner);
-    
-    // swap_admin creates the swap contract 
+
+    // swap_admin creates the swap contract
     let swap = create_swap(&mut app, &swap_admin, nft.clone());
     let swap_inst = swap.clone();
-    
+
     // Mint native to `arch_owner`
     mint_native(
         &mut app,
@@ -48,7 +42,7 @@ fn test_invalid_payment_native() {
         Uint128::from(10000000000000000000_u128), // 10 ARCH as aarch
     );
 
-    // cw721_owner mints a cw721 
+    // cw721_owner mints a cw721
     let token_id = "petrify".to_string();
     let token_uri = "https://www.merriam-webster.com/dictionary/petrify".to_string();
     let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
@@ -66,7 +60,7 @@ fn test_invalid_payment_native() {
         id: "firstswap".to_string(),
         cw721: nft.clone(),
         payment_token: None,
-        token_id: token_id.clone(),    
+        token_id: token_id.clone(),
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
         price: Uint128::from(5000000000000000000_u128), // 5 ARCH as aarch
         swap_type: SwapType::Sale,
@@ -87,30 +81,37 @@ fn test_invalid_payment_native() {
 
     // cw721 seller (cw721_owner) creates a swap
     let _res = app
-        .execute_contract(cw721_owner.clone(), swap_inst.clone(), &ExecuteMsg::Create(creation_msg), &[])
+        .execute_contract(
+            cw721_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Create(creation_msg),
+            &[],
+        )
         .unwrap();
 
     // Buyer attempts to purchase cw721, under paying 1 ARCH
-    assert!(app.execute_contract(
-        arch_owner.clone(), 
-        swap_inst.clone(), 
-        &ExecuteMsg::Finish(finish_msg), 
-        &[Coin {
-            denom: String::from(DENOM),
-            amount: Uint128::from(1000000000000000000_u128)
-        }]
-    )
-    .is_err());
+    assert!(app
+        .execute_contract(
+            arch_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Finish(finish_msg),
+            &[Coin {
+                denom: String::from(DENOM),
+                amount: Uint128::from(1000000000000000000_u128)
+            }]
+        )
+        .is_err());
 
     // cw721_owner has retained the NFT
     let owner_query: OwnerOfResponse = query(
         &mut app,
         nft.clone(),
         Cw721QueryMsg::OwnerOf {
-            token_id: token_id, 
-            include_expired: None
-        }
-    ).unwrap();
+            token_id: token_id,
+            include_expired: None,
+        },
+    )
+    .unwrap();
 
     // cw721_owner has not received the ARCH amount
     let cw721_owner_balance: Coin = bank_query(&mut app, &cw721_owner);
@@ -129,7 +130,7 @@ fn test_invalid_payment_native() {
 #[test]
 fn test_invalid_payment_native_offer() {
     let mut app = mock_app();
-    
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -139,11 +140,11 @@ fn test_invalid_payment_native_offer() {
 
     // cw721_owner creates the cw721
     let nft = create_cw721(&mut app, &cw721_owner);
-    
-    // swap_admin creates the swap contract 
+
+    // swap_admin creates the swap contract
     let swap = create_swap(&mut app, &swap_admin, nft.clone());
     let swap_inst = swap.clone();
-    
+
     // Mint native to `arch_owner`
     mint_native(
         &mut app,
@@ -151,7 +152,7 @@ fn test_invalid_payment_native_offer() {
         Uint128::from(10000000000000000000_u128), // 10 ARCH as aarch
     );
 
-    // cw721_owner mints a cw721 
+    // cw721_owner mints a cw721
     let token_id = "petrify".to_string();
     let token_uri = "https://www.merriam-webster.com/dictionary/petrify".to_string();
     let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
@@ -170,38 +171,43 @@ fn test_invalid_payment_native_offer() {
         id: swap_id.clone(),
         cw721: nft.clone(),
         payment_token: None,
-        token_id: token_id.clone(),    
+        token_id: token_id.clone(),
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
         price: Uint128::from(9000000000000000000_u128), // 9 ARCH as aarch
         swap_type: SwapType::Offer,
     };
 
     // Invalid payment must err
-    assert!(
-        app.execute_contract(
-            arch_owner.clone(), 
-            swap_inst.clone(), 
-            &ExecuteMsg::Create(creation_msg), 
+    assert!(app
+        .execute_contract(
+            arch_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Create(creation_msg),
             &[Coin {
                 denom: String::from(DENOM),
                 amount: Uint128::from(8000000000000000000_u128)
             }]
-        ).is_err()
-    );
+        )
+        .is_err());
 
     // cw721_owner has not transferred the NFT
     let owner_query: OwnerOfResponse = query(
-        &mut app,nft.clone(),
+        &mut app,
+        nft.clone(),
         Cw721QueryMsg::OwnerOf {
-            token_id: token_id, 
-            include_expired: None
-        }
-    ).unwrap();
+            token_id: token_id,
+            include_expired: None,
+        },
+    )
+    .unwrap();
     assert_eq!(owner_query.owner, cw721_owner);
 
     // Bidding buyer's account has not been debited
     let arch_owner_balance: Coin = bank_query(&mut app, &arch_owner);
-    assert_eq!(arch_owner_balance.amount, Uint128::from(10000000000000000000_u128));
+    assert_eq!(
+        arch_owner_balance.amount,
+        Uint128::from(10000000000000000000_u128)
+    );
 }
 
 // Sales cannot be consumed with invalid payment parameters
@@ -209,7 +215,7 @@ fn test_invalid_payment_native_offer() {
 #[test]
 fn test_invalid_payment_cw20() {
     let mut app = mock_app();
-    
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -221,21 +227,21 @@ fn test_invalid_payment_cw20() {
 
     // cw721_owner creates the cw721
     let nft = create_cw721(&mut app, &cw721_owner);
-    
-    // swap_admin creates the swap contract 
+
+    // swap_admin creates the swap contract
     let swap = create_swap(&mut app, &swap_admin, nft.clone());
     let swap_inst = swap.clone();
-    
+
     // cw20_owner creates a cw20 coin
     let cw20 = create_cw20(
         &mut app,
         &cw20_owner,
         "testcw".to_string(),
         "tscw".to_string(),
-        Uint128::from(100000_u32)
+        Uint128::from(100000_u32),
     );
 
-    // cw721_owner mints a cw721 
+    // cw721_owner mints a cw721
     let token_id = "petrify".to_string();
     let token_uri = "https://www.merriam-webster.com/dictionary/petrify".to_string();
     let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
@@ -253,10 +259,10 @@ fn test_invalid_payment_cw20() {
         id: "firstswap".to_string(),
         cw721: nft.clone(),
         payment_token: Some(Addr::unchecked(cw20.clone())),
-        token_id: token_id.clone(),    
+        token_id: token_id.clone(),
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
         price: Uint128::from(100000_u32),
-        swap_type:SwapType::Offer,
+        swap_type: SwapType::Offer,
     };
     let finish_msg = FinishSwapMsg {
         id: creation_msg.id.clone(),
@@ -274,13 +280,18 @@ fn test_invalid_payment_cw20() {
 
     // cw721 seller (cw721_owner) creates a swap
     let _res = app
-        .execute_contract(cw721_owner.clone(), swap_inst.clone(), &ExecuteMsg::Create(creation_msg), &[])
+        .execute_contract(
+            cw721_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Create(creation_msg),
+            &[],
+        )
         .unwrap();
 
     // cw20_owner does not approve enough funds
     let cw20_approve_msg = Cw20ExecuteMsg::IncreaseAllowance {
         spender: swap.to_string(),
-        amount:  Uint128::from(10000_u32),
+        amount: Uint128::from(10000_u32),
         expires: None,
     };
     let _res = app
@@ -288,33 +299,33 @@ fn test_invalid_payment_cw20() {
         .unwrap();
 
     // cw20's purchase fails
-    assert!(
-        app.execute_contract(
-            cw20_owner.clone(), 
-            swap_inst.clone(), 
-            &ExecuteMsg::Finish(finish_msg.clone()), 
+    assert!(app
+        .execute_contract(
+            cw20_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Finish(finish_msg.clone()),
             &[]
-        ).is_err()
-    );
+        )
+        .is_err());
 
     // random has no cw20, their purchase fails
-    assert!(
-        app.execute_contract(
-            random.clone(), 
-            swap_inst.clone(), 
-            &ExecuteMsg::Finish(finish_msg), 
+    assert!(app
+        .execute_contract(
+            random.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Finish(finish_msg),
             &[]
-        ).is_err()
-    );
+        )
+        .is_err());
 }
 
-// cw20 offers cannot be consumed with invalid approvals, or 
+// cw20 offers cannot be consumed with invalid approvals, or
 // insufficient funds. cw20 owners must approve marketplace
 // to spend all funds required by the swap price
 #[test]
 fn test_invalid_payment_cw20_offer() {
     let mut app = mock_app();
-    
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
     // cw721_owner owns the cw721
@@ -324,22 +335,22 @@ fn test_invalid_payment_cw20_offer() {
 
     // cw721_owner creates the cw721
     let nft = create_cw721(&mut app, &cw721_owner);
-    
-    // swap_admin creates the swap contract 
+
+    // swap_admin creates the swap contract
     let swap = create_swap(&mut app, &swap_admin, nft.clone());
     let swap_inst = swap.clone();
-    
+
     // cw20_owner creates a cw20 coin
     let cw20 = create_cw20(
         &mut app,
         &cw20_owner,
         "testcw".to_string(),
         "tscw".to_string(),
-        Uint128::from(100000_u32)
+        Uint128::from(100000_u32),
     );
     let cw20_inst = cw20.clone();
 
-    // cw721_owner mints a cw721 
+    // cw721_owner mints a cw721
     let token_id = "petrify".to_string();
     let token_uri = "https://www.merriam-webster.com/dictionary/petrify".to_string();
     let mint_msg = Cw721ExecuteMsg::Mint(MintMsg::<Extension> {
@@ -355,7 +366,7 @@ fn test_invalid_payment_cw20_offer() {
     // Bidding buyer (cw20_owner) does not approve enough funds
     let cw20_approve_msg = Cw20ExecuteMsg::IncreaseAllowance {
         spender: swap.to_string(),
-        amount:  Uint128::from(10000_u32),
+        amount: Uint128::from(10000_u32),
         expires: None,
     };
     let _res = app
@@ -367,7 +378,7 @@ fn test_invalid_payment_cw20_offer() {
         id: "firstswap".to_string(),
         cw721: nft.clone(),
         payment_token: Some(Addr::unchecked(cw20)),
-        token_id: token_id.clone(),    
+        token_id: token_id.clone(),
         expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
         price: Uint128::from(100000_u32),
         swap_type: SwapType::Offer,
@@ -377,7 +388,12 @@ fn test_invalid_payment_cw20_offer() {
     };
 
     let _res = app
-        .execute_contract(cw20_owner.clone(), swap_inst.clone(), &ExecuteMsg::Create(creation_msg), &[])
+        .execute_contract(
+            cw20_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Create(creation_msg),
+            &[],
+        )
         .unwrap();
 
     // cw721_owner must approve the swap contract to spend their NFT
@@ -391,23 +407,25 @@ fn test_invalid_payment_cw20_offer() {
         .unwrap();
 
     // cw721_owner accepts the cw20 buyer's offer but the swap must fail (invalid payment)
-    assert!(
-        app.execute_contract(
-            cw721_owner.clone(), 
-            swap_inst.clone(), 
-            &ExecuteMsg::Finish(finish_msg), 
+    assert!(app
+        .execute_contract(
+            cw721_owner.clone(),
+            swap_inst.clone(),
+            &ExecuteMsg::Finish(finish_msg),
             &[]
-        ).is_err()
-    );
+        )
+        .is_err());
 
     // cw721_owner has not transferred the NFT
     let owner_query: OwnerOfResponse = query(
-        &mut app,nft.clone(),
+        &mut app,
+        nft.clone(),
         Cw721QueryMsg::OwnerOf {
-            token_id: token_id, 
-            include_expired: None
-        }
-    ).unwrap();
+            token_id: token_id,
+            include_expired: None,
+        },
+    )
+    .unwrap();
     assert_eq!(owner_query.owner, cw721_owner);
 
     // cw20_owner has not transferred the cw20 amount
@@ -415,8 +433,9 @@ fn test_invalid_payment_cw20_offer() {
         &mut app,
         cw20_inst,
         Cw20QueryMsg::Balance {
-            address: cw20_owner.to_string()
-        }
-    ).unwrap();
+            address: cw20_owner.to_string(),
+        },
+    )
+    .unwrap();
     assert_eq!(balance_query.balance, Uint128::from(100000_u32));
 }

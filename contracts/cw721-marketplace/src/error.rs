@@ -1,4 +1,3 @@
-
 use cosmwasm_std::StdError;
 use thiserror::Error;
 
@@ -33,7 +32,7 @@ pub enum ContractError {
 
     #[error("Insufficient contract balance")]
     InsufficientBalance {},
- 
+
     #[error("Unauthorized")]
     Unauthorized,
     #[error("Expired atomic swap")]

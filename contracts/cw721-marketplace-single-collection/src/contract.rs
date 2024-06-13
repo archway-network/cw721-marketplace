@@ -1,22 +1,22 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::{
-    Binary, Deps, DepsMut, entry_point, Env, MessageInfo, Reply, Response, StdResult, 
-    SubMsgResult, to_json_binary,
+    entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Reply, Response,
+    StdResult, SubMsgResult,
 };
 
 use cw721_marketplace_utils::prelude::SwapType;
 
+use crate::error::ContractError;
 use crate::execute::{
-    execute_create, execute_cancel, execute_finish, execute_update, execute_update_config,
+    execute_cancel, execute_create, execute_finish, execute_update, execute_update_config,
     execute_withdraw_fees,
 };
+use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 use crate::query::{
     query_config, query_details, query_list, query_swap_total, query_swaps, query_swaps_by_creator,
     query_swaps_by_denom, query_swaps_by_payment_type, query_swaps_by_price, query_swaps_of_token,
 };
-use crate::msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg};
 use crate::state::{Config, CONFIG};
-use crate::error::ContractError;
 
 use cw2::{get_contract_version, set_contract_version};
 
@@ -34,7 +34,11 @@ pub fn instantiate(
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
     // Max fee percentage 30%
-    let fee_percentage: u64 = if msg.fee_percentage > 30 { 0_u64 } else { msg.fee_percentage };
+    let fee_percentage: u64 = if msg.fee_percentage > 30 {
+        0_u64
+    } else {
+        msg.fee_percentage
+    };
 
     let config = Config {
         admin: msg.admin,
@@ -63,7 +67,7 @@ pub fn execute(
         ExecuteMsg::Finish(msg) => execute_finish(deps, env, info, msg),
         ExecuteMsg::Update(msg) => execute_update(deps, env, info, msg),
         ExecuteMsg::Cancel(msg) => execute_cancel(deps, env, info, msg),
-        
+
         // Admin only
         ExecuteMsg::UpdateConfig { config } => execute_update_config(deps, env, info, config),
         ExecuteMsg::Withdraw(msg) => execute_withdraw_fees(deps, env, info, msg),
@@ -75,37 +79,61 @@ pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::List { start_after, limit } => {
             to_json_binary(&query_list(deps, start_after, limit)?)
-        },
-        QueryMsg::Details { id } => {
-            to_json_binary(&query_details(deps, id)?)
-        },
-        QueryMsg::GetTotal { swap_type } => {
-            to_json_binary(&query_swap_total(deps, swap_type)?)
-        },
+        }
+        QueryMsg::Details { id } => to_json_binary(&query_details(deps, id)?),
+        QueryMsg::GetTotal { swap_type } => to_json_binary(&query_swap_total(deps, swap_type)?),
         QueryMsg::GetOffers { page, limit } => {
             to_json_binary(&query_swaps(deps, SwapType::Offer, page, limit)?)
-        },
+        }
         QueryMsg::GetListings { page, limit } => {
             to_json_binary(&query_swaps(deps, SwapType::Sale, page, limit)?)
         }
-        QueryMsg::ListingsOfToken { token_id, swap_type, page, limit } => {
-            to_json_binary(&query_swaps_of_token(deps, token_id, swap_type, page, limit)?)
-        }
-        QueryMsg::SwapsOf { address, swap_type, page, limit } => {
-            to_json_binary(&query_swaps_by_creator(deps, address, swap_type, page, limit)?)
-        }
-        QueryMsg::SwapsByPrice { min, max, swap_type, page, limit } => {
-            to_json_binary(&query_swaps_by_price(deps, min, max, swap_type, page, limit)?)
-        }
-        QueryMsg::SwapsByDenom { payment_token, swap_type, page, limit } => {
-            to_json_binary(&query_swaps_by_denom(deps, payment_token, swap_type, page, limit)?)
-        }
-        QueryMsg::SwapsByPaymentType { cw20, swap_type, page, limit } => {
-            to_json_binary(&query_swaps_by_payment_type(deps, cw20, swap_type, page, limit)?)
-        }
-        QueryMsg::Config {} => {
-            to_json_binary(&query_config(deps)?)
-        }
+        QueryMsg::ListingsOfToken {
+            token_id,
+            swap_type,
+            page,
+            limit,
+        } => to_json_binary(&query_swaps_of_token(
+            deps, token_id, swap_type, page, limit,
+        )?),
+        QueryMsg::SwapsOf {
+            address,
+            swap_type,
+            page,
+            limit,
+        } => to_json_binary(&query_swaps_by_creator(
+            deps, address, swap_type, page, limit,
+        )?),
+        QueryMsg::SwapsByPrice {
+            min,
+            max,
+            swap_type,
+            page,
+            limit,
+        } => to_json_binary(&query_swaps_by_price(
+            deps, min, max, swap_type, page, limit,
+        )?),
+        QueryMsg::SwapsByDenom {
+            payment_token,
+            swap_type,
+            page,
+            limit,
+        } => to_json_binary(&query_swaps_by_denom(
+            deps,
+            payment_token,
+            swap_type,
+            page,
+            limit,
+        )?),
+        QueryMsg::SwapsByPaymentType {
+            cw20,
+            swap_type,
+            page,
+            limit,
+        } => to_json_binary(&query_swaps_by_payment_type(
+            deps, cw20, swap_type, page, limit,
+        )?),
+        QueryMsg::Config {} => to_json_binary(&query_config(deps)?),
     }
 }
 
@@ -135,10 +163,8 @@ pub fn migrate(deps: DepsMut, _env: Env, _msg: MigrateMsg) -> Result<Response, C
 #[cfg(test)]
 mod tests {
     use super::*;
+    use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info, MOCK_CONTRACT_ADDR};
     use cosmwasm_std::Addr;
-    use cosmwasm_std::testing::{
-        mock_dependencies, mock_env, mock_info, MOCK_CONTRACT_ADDR
-    };
 
     // Instantiation works
     #[test]

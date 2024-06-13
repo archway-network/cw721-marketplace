@@ -1,20 +1,19 @@
-use cosmwasm_std::{BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, QueryRequest, Response, to_json_binary, WasmMsg, WasmQuery};
+use cosmwasm_std::{
+    to_json_binary, BankMsg, Coin, CosmosMsg, DepsMut, Env, MessageInfo, Order, QueryRequest,
+    Response, WasmMsg, WasmQuery,
+};
 
 use cw20::Cw20ExecuteMsg;
 use cw721::OwnerOfResponse;
 
-use cw721_marketplace_utils::{
-    FeeSplit, prelude::CW721Swap, prelude::SwapType
-};
 use crate::utils::{
     check_sent_required_payment, fee_split, handle_swap_transfers, query_name_owner,
 };
+use cw721_marketplace_utils::{prelude::CW721Swap, prelude::SwapType, FeeSplit};
 
-use crate::state::{Config, CONFIG, SWAPS};
-use crate::msg::{
-    CancelMsg, FinishSwapMsg, SwapMsg, UpdateMsg, WithdrawMsg
-};
 use crate::error::ContractError;
+use crate::msg::{CancelMsg, FinishSwapMsg, SwapMsg, UpdateMsg, WithdrawMsg};
+use crate::state::{Config, CONFIG, SWAPS};
 
 pub fn execute_create(
     deps: DepsMut,
@@ -83,7 +82,7 @@ pub fn execute_update(
         return Err(ContractError::Unauthorized {});
     }
 
-    // For security reasons, creator, nft_contract, token_id,  
+    // For security reasons, creator, nft_contract, token_id,
     // payment_token and swap_type should not be updatable
     // E.g. only price and expiration can be modified
     let swap = CW721Swap {
@@ -135,11 +134,13 @@ pub fn execute_finish(
     }
 
     // Calculate fee split
-    let split = if swap.payment_token.is_none() { 
-        let funds: Vec<Coin> = info.funds.into_iter()
-            .filter(|coin| { coin.denom == config.denom })
+    let split = if swap.payment_token.is_none() {
+        let funds: Vec<Coin> = info
+            .funds
+            .into_iter()
+            .filter(|coin| coin.denom == config.denom)
             .collect();
-        
+
         fee_split(&deps, funds[0].amount).unwrap_or(FeeSplit::only_seller(funds[0].amount))
     } else {
         fee_split(&deps, swap.price).unwrap_or(FeeSplit::only_seller(swap.price))
@@ -169,18 +170,18 @@ pub fn execute_finish(
                 config.denom.clone(),
                 split,
             )?
-        },
+        }
         SwapType::Sale => handle_swap_transfers(
             env,
-            &swap.creator, 
-            &info.sender, 
-            swap.clone(), 
+            &swap.creator,
+            &info.sender,
+            swap.clone(),
             config.denom.clone(),
             split,
         )?,
     };
 
-    // Remove all swaps for this token_id 
+    // Remove all swaps for this token_id
     // (as they're no longer valid)
     let swap_data = swap.clone();
     let swaps: Result<Vec<(String, CW721Swap)>, cosmwasm_std::StdError> = SWAPS
@@ -191,7 +192,7 @@ pub fn execute_finish(
             SWAPS.remove(deps.storage, &swap.0);
         }
     }
-    
+
     let payment_token: String = if swap.payment_token.is_some() {
         swap.payment_token.unwrap().to_string()
     } else {
@@ -259,10 +260,11 @@ pub fn execute_withdraw_fees(
     let transfer_result = if msg.payment_token.is_none() {
         let bank_transfer_msg = BankMsg::Send {
             to_address: info.sender.into(),
-            amount: ([Coin { 
-                denom: denom.clone(), 
-                amount 
-            }]).to_vec(),
+            amount: ([Coin {
+                denom: denom.clone(),
+                amount,
+            }])
+            .to_vec(),
         };
 
         let bank_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Bank(bank_transfer_msg);
@@ -272,7 +274,7 @@ pub fn execute_withdraw_fees(
             recipient: info.sender.into(),
             amount,
         };
-        
+
         let cw20_transfer: CosmosMsg = cosmwasm_std::CosmosMsg::Wasm(WasmMsg::Execute {
             contract_addr: msg.payment_token.unwrap().into(),
             msg: to_json_binary(&cw20_transfer_msg)?,

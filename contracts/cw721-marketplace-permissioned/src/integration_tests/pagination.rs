@@ -1,21 +1,15 @@
 #![cfg(test)]
-use cosmwasm_std::{
-    Addr, Uint128,
-};
+use cosmwasm_std::{Addr, Uint128};
 use cw_multi_test::Executor;
 
 use cw20::Expiration;
-use cw721_base::{
-    msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg,
-};
+use cw721_base::{msg::ExecuteMsg as Cw721ExecuteMsg, Extension, MintMsg};
 use cw721_marketplace_utils::prelude::{ListResponse, PageResult};
 
 use crate::integration_tests::util::{
     create_cw721, create_swap, has_unique_elements, mock_app, query,
 };
-use crate::msg::{
-    ExecuteMsg, QueryMsg, SwapMsg,
-};
+use crate::msg::{ExecuteMsg, QueryMsg, SwapMsg};
 use crate::state::SwapType;
 
 // Listing swaps and querying filter entry points must be enumerable,
@@ -23,7 +17,7 @@ use crate::state::SwapType;
 #[test]
 fn test_pagination() {
     let mut app = mock_app();
-    
+
     // Swap owner deploys
     let swap_admin = Addr::unchecked("swap_deployer");
 
@@ -33,18 +27,30 @@ fn test_pagination() {
     // cw721_owner creates cw721 token contract
     let nft = create_cw721(&mut app, &cw721_owner);
 
-    // swap_admin creates the swap contract 
+    // swap_admin creates the swap contract
     let swap = create_swap(&mut app, &swap_admin, nft.clone());
     let swap_inst = swap.clone();
 
-    // cw721_owner mints 15 cw721 tokens 
+    // cw721_owner mints 15 cw721 tokens
     let token_ids = vec![
         // Page 1 of 3
-        "token1".to_string(),"token2".to_string(),"token3".to_string(),"token4".to_string(),"token5".to_string(),
+        "token1".to_string(),
+        "token2".to_string(),
+        "token3".to_string(),
+        "token4".to_string(),
+        "token5".to_string(),
         // Page 2 of 3
-        "token6".to_string(),"token7".to_string(),"token8".to_string(),"token9".to_string(),"token10".to_string(),
+        "token6".to_string(),
+        "token7".to_string(),
+        "token8".to_string(),
+        "token9".to_string(),
+        "token10".to_string(),
         // Page 3 of 3
-        "token11".to_string(),"token12".to_string(),"token13".to_string(),"token14".to_string(),"token15".to_string(),
+        "token11".to_string(),
+        "token12".to_string(),
+        "token13".to_string(),
+        "token14".to_string(),
+        "token15".to_string(),
     ];
     let token_uri = "https://www.merriam-webster.com/dictionary/petrify".to_string();
 
@@ -78,14 +84,19 @@ fn test_pagination() {
             id: token_id.clone(),
             cw721: nft.clone(),
             payment_token: None,
-            token_id: token_id.clone(),    
+            token_id: token_id.clone(),
             expires: Expiration::from(cw20::Expiration::AtHeight(384798573487439743)),
             price: Uint128::from(1000000000000000000_u128), // 1 ARCH as aarch
             swap_type: SwapType::Sale,
         };
         // Create swap listing
         let _res = app
-            .execute_contract(cw721_owner.clone(), swap_inst.clone(), &ExecuteMsg::Create(creation_msg), &[])
+            .execute_contract(
+                cw721_owner.clone(),
+                swap_inst.clone(),
+                &ExecuteMsg::Create(creation_msg),
+                &[],
+            )
             .unwrap();
     }
 
@@ -99,8 +110,9 @@ fn test_pagination() {
         QueryMsg::List {
             start_after: None,
             limit: Some(limit.clone()),
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // Page 2
     let page_2: ListResponse = query(
         &mut app,
@@ -108,8 +120,9 @@ fn test_pagination() {
         QueryMsg::List {
             start_after: Some(page_1.swaps[4].clone()),
             limit: Some(limit.clone()),
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // Page 3
     let page_3: ListResponse = query(
         &mut app,
@@ -117,9 +130,10 @@ fn test_pagination() {
         QueryMsg::List {
             start_after: Some(page_2.swaps[4].clone()),
             limit: Some(limit.clone()),
-        }
-    ).unwrap();
-    
+        },
+    )
+    .unwrap();
+
     // Paginated results must not have duplicates
     let mut all_res = page_1.swaps.clone();
     all_res.append(&mut page_2.swaps.clone());
@@ -139,8 +153,9 @@ fn test_pagination() {
         QueryMsg::GetListings {
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // Page 2
     let page_2b: PageResult = query(
         &mut app,
@@ -148,8 +163,9 @@ fn test_pagination() {
         QueryMsg::GetListings {
             page: Some(1_u32),
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
 
     // Paginated results must have correct page sizes
     assert_eq!(page_1b.swaps.len(), 10);
@@ -178,8 +194,9 @@ fn test_pagination() {
             cw721: None,
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // Page 2
     let page_2c: PageResult = query(
         &mut app,
@@ -190,8 +207,9 @@ fn test_pagination() {
             cw721: None,
             page: Some(1_u32),
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
 
     // Paginated results must have correct page sizes
     assert_eq!(page_1c.swaps.len(), 10);
@@ -221,8 +239,9 @@ fn test_pagination() {
             cw721: None,
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // Page 2
     let page_2d: PageResult = query(
         &mut app,
@@ -234,8 +253,9 @@ fn test_pagination() {
             cw721: None,
             page: Some(1_u32),
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
 
     // Paginated results must have correct page sizes
     assert_eq!(page_1d.swaps.len(), 10);
@@ -264,8 +284,9 @@ fn test_pagination() {
             cw721: None,
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // Page 2
     let page_2e: PageResult = query(
         &mut app,
@@ -276,8 +297,9 @@ fn test_pagination() {
             cw721: None,
             page: Some(1_u32),
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
 
     // Paginated results must have correct page sizes
     assert_eq!(page_1e.swaps.len(), 10);
@@ -295,7 +317,6 @@ fn test_pagination() {
     }
     assert!(has_unique_elements(token_ids_e));
 
-
     // Query SwapsByPaymentType entry point for 2 pages
     // Page 1
     let page_1f: PageResult = query(
@@ -307,8 +328,9 @@ fn test_pagination() {
             cw721: None,
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // Page 2
     let page_2f: PageResult = query(
         &mut app,
@@ -319,8 +341,9 @@ fn test_pagination() {
             cw721: None,
             page: Some(1_u32),
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
 
     // Paginated results must have correct page sizes
     assert_eq!(page_1f.swaps.len(), 10);
@@ -348,8 +371,9 @@ fn test_pagination() {
             swap_type: None, // All Listings
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // 1 Result
     assert_eq!(listings_of_token_a.swaps.len(), 1);
 
@@ -363,8 +387,9 @@ fn test_pagination() {
             swap_type: Some(SwapType::Sale), // Sale Listings
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // 1 Result
     assert_eq!(listings_of_token_b.swaps.len(), 1);
 
@@ -378,8 +403,9 @@ fn test_pagination() {
             swap_type: Some(SwapType::Offer), // Offer Listings
             page: None,
             limit: None,
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
     // 0 Results
     assert_eq!(listings_of_token_c.swaps.len(), 0);
 }
