@@ -18,7 +18,7 @@ overflow-checks = true
 cosmwasm-schema = "~1.0.0"
 cw-multi-test = "0.13.4"
 cosmwasm-std = "~1.5.0"
-cosmwasm-storage = "~1.0.0"
+cosmwasm-storage = "^1.0.0"
 cw-storage-plus = "0.14"
 cw2 = "0.12"
 cw20 = { version = "0.13.4" }
